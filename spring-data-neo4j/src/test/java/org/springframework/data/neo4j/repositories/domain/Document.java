@@ -11,19 +11,38 @@
  *
  */
 
-package org.springframework.data.neo4j.event;
+package org.springframework.data.neo4j.repositories.domain;
 
 /**
- * {@link Neo4jDataEvent} published after a particular entity is deleted.
- *
- * @author Adam George
+ * @author vince
  */
-public class AfterDeleteEvent extends Neo4jDataEvent {
+public class Document {
 
-    private static final long serialVersionUID = 1185473862611150682L;
+    private Folder folder;
+    private String name;
+    private Long id;
 
-    public AfterDeleteEvent(Object entity) {
-        super(entity);
+    public Folder getFolder() {
+        return folder;
     }
 
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -14,27 +14,32 @@
 package org.springframework.data.neo4j.template;
 
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.neo4j.ogm.cypher.Filters;
 import org.neo4j.ogm.cypher.query.Pagination;
 import org.neo4j.ogm.cypher.query.SortOrder;
 import org.neo4j.ogm.exception.NotFoundException;
 import org.neo4j.ogm.model.Query;
-import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.model.QueryStatistics;
+import org.neo4j.ogm.model.Result;
+import org.springframework.data.neo4j.event.Neo4jApplicationPublisherEventAware;
 import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Spring Data operations interface, implemented by {@link Neo4jTemplate}, that provides the API for using
  * the persistence framework in a more direct way as an alternative to the repositories.
  *
+ * Note that this interface extends {@link Neo4jApplicationPublisherEventAware} allowing users to publish events data manipulation
+ * operations - specifically delete and save.
+ *
  * @author Adam George
  * @author Luanne Misquitta
+ * @author Vince Bickers
  */
 @Repository
-public interface Neo4jOperations {
+public interface Neo4jOperations extends Neo4jApplicationPublisherEventAware {
 
     /**
      * Loads an entity of type T that matches the specified ID to the default depth.

@@ -18,6 +18,8 @@ import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.*;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -40,6 +42,12 @@ public class JSR303Context extends Neo4jConfiguration {
     @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
     public Session getSession() throws Exception {
         return super.getSession();
+    }
+
+    @Bean
+    @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+    public Neo4jOperations neo4jTemplate() throws Exception {
+        return new Neo4jTemplate(getSession());
     }
 
 }

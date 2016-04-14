@@ -13,6 +13,7 @@
 
 package org.springframework.data.neo4j.template;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
@@ -21,7 +22,10 @@ import org.springframework.data.neo4j.event.AfterDeleteEvent;
 import org.springframework.data.neo4j.event.AfterSaveEvent;
 import org.springframework.data.neo4j.event.BeforeDeleteEvent;
 import org.springframework.data.neo4j.event.BeforeSaveEvent;
+import org.springframework.data.neo4j.events.TestNeo4jEventListener;
 import org.springframework.data.neo4j.examples.movies.domain.Actor;
+import org.springframework.data.neo4j.examples.movies.domain.Cinema;
+import org.springframework.data.neo4j.examples.movies.domain.User;
 import org.springframework.data.neo4j.template.context.DataManipulationEventConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -47,6 +51,14 @@ public class TemplateApplicationEventTest extends MultiDriverTestClass {
     @Autowired
     private TestNeo4jEventListener<AfterDeleteEvent> afterDeleteEventListener;
 
+    @Before
+    public void initialiseEventListeners() {
+        beforeSaveEventListener.clear();
+        afterSaveEventListener.clear();
+        beforeDeleteEventListener.clear();
+        afterDeleteEventListener.clear();
+    }
+
     @Test
     public void shouldCreateTemplateAndPublishAppropriateApplicationEventsOnSaveAndOnDelete() {
         assertNotNull("The Neo4jTemplate wasn't autowired into this test", this.neo4jTemplate);
@@ -58,17 +70,61 @@ public class TemplateApplicationEventTest extends MultiDriverTestClass {
         assertFalse(this.afterSaveEventListener.hasReceivedAnEvent());
         this.neo4jTemplate.save(entity);
         assertTrue(this.beforeSaveEventListener.hasReceivedAnEvent());
-        assertSame(entity, this.beforeSaveEventListener.getEvent().getEntity());
+        assertSame(entity, this.beforeSaveEventListener.getEvents().get(0).getEntity());
         assertTrue(this.afterSaveEventListener.hasReceivedAnEvent());
-        assertSame(entity, this.afterSaveEventListener.getEvent().getEntity());
+        assertSame(entity, this.afterSaveEventListener.getEvents().get(0).getEntity());
 
         assertFalse(this.beforeDeleteEventListener.hasReceivedAnEvent());
         assertFalse(this.afterDeleteEventListener.hasReceivedAnEvent());
+
         this.neo4jTemplate.delete(entity);
         assertTrue(this.beforeDeleteEventListener.hasReceivedAnEvent());
-        assertSame(entity, this.beforeDeleteEventListener.getEvent().getEntity());
+        assertSame(entity, this.beforeDeleteEventListener.getEvents().get(0).getEntity());
         assertTrue(this.afterDeleteEventListener.hasReceivedAnEvent());
-        assertSame(entity, this.afterDeleteEventListener.getEvent().getEntity());
+        assertSame(entity, this.afterDeleteEventListener.getEvents().get(0).getEntity());
     }
 
+    @Test
+    public void shouldCreateTemplateAndPublishAppropriateApplicationEventsForNestedObject() {
+        assertNotNull("The Neo4jTemplate wasn't autowired into this test", this.neo4jTemplate);
+
+        User user = new User();
+        Cinema cinema = new Cinema("Peckhamplex");
+
+        user.setName("Amy");
+        cinema.addVisitor(user);
+
+        this.neo4jTemplate.save(cinema);
+
+        assertTrue(this.beforeSaveEventListener.hasReceivedAnEvent());
+        assertTrue(this.afterSaveEventListener.hasReceivedAnEvent());
+        assertEquals(2, this.beforeSaveEventListener.getEvents().size());
+        assertEquals(2, this.afterSaveEventListener.getEvents().size());
+
+        assertFalse(this.beforeDeleteEventListener.hasReceivedAnEvent());
+        assertFalse(this.afterDeleteEventListener.hasReceivedAnEvent());
+
+        initialiseEventListeners();
+
+        this.neo4jTemplate.delete(user);
+        // delete events on user
+        assertTrue(this.beforeDeleteEventListener.hasReceivedAnEvent());
+        assertEquals(1, this.beforeDeleteEventListener.getEvents().size());
+        assertSame(user, this.beforeDeleteEventListener.getEvents().get(0).getEntity());
+
+        assertTrue(this.afterDeleteEventListener.hasReceivedAnEvent());
+        assertEquals(1, this.afterDeleteEventListener.getEvents().size());
+        assertSame(user, this.afterDeleteEventListener.getEvents().get(0).getEntity());
+
+        // save/update events on cinema as well
+        assertTrue(this.beforeSaveEventListener.hasReceivedAnEvent());
+        assertEquals(1, this.beforeSaveEventListener.getEvents().size());
+        assertSame(cinema, this.beforeSaveEventListener.getEvents().get(0).getEntity());
+
+        assertTrue(this.afterSaveEventListener.hasReceivedAnEvent());
+        assertEquals(1, this.afterSaveEventListener.getEvents().size());
+        assertSame(cinema, this.afterSaveEventListener.getEvents().get(0).getEntity());
+
+
+    }
 }

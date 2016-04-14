@@ -13,17 +13,14 @@
 
 package org.springframework.data.neo4j.event;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+
 /**
- * {@link Neo4jDataEvent} published after a particular entity is deleted.
+ * Allows an ApplicationEventPublisher to be removed from an ApplicationEventPublisherAware component
  *
- * @author Adam George
+ * @author Vince Bickers
  */
-public class AfterDeleteEvent extends Neo4jDataEvent {
-
-    private static final long serialVersionUID = 1185473862611150682L;
-
-    public AfterDeleteEvent(Object entity) {
-        super(entity);
-    }
-
+public interface Neo4jApplicationPublisherEventAware extends ApplicationEventPublisherAware {
+    boolean removeApplicationEventPublisher(ApplicationEventPublisher eventPublisher);
 }

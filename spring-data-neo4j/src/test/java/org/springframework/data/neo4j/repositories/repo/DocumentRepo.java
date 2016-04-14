@@ -11,19 +11,15 @@
  *
  */
 
-package org.springframework.data.neo4j.event;
+package org.springframework.data.neo4j.repositories.repo;
+
+import org.springframework.data.neo4j.repositories.domain.Document;
+import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.stereotype.Repository;
 
 /**
- * {@link Neo4jDataEvent} published after a particular entity is deleted.
- *
- * @author Adam George
+ * @author vince
  */
-public class AfterDeleteEvent extends Neo4jDataEvent {
-
-    private static final long serialVersionUID = 1185473862611150682L;
-
-    public AfterDeleteEvent(Object entity) {
-        super(entity);
-    }
-
+@Repository
+public interface DocumentRepo extends GraphRepository<Document> {
 }

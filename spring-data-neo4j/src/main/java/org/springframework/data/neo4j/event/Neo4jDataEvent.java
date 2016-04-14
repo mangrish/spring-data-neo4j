@@ -22,20 +22,18 @@ import org.springframework.data.neo4j.template.Neo4jTemplate;
  * has been renamed to better describe the nature of the events.
  *
  * @author Adam George
+ * @author Vince Bickers
  */
-public class Neo4jDataManipulationEvent extends ApplicationEvent {
+public class Neo4jDataEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = -9025087608146228149L;
 
-    private Object entity;
-
-    public Neo4jDataManipulationEvent(Object source, Object entity) {
-        super(source);
-        this.entity = entity;
+    public Neo4jDataEvent(Object entity) {
+        super(entity);
     }
 
     public Object getEntity() {
-        return entity;
+        return super.getSource();
     }
 
 }

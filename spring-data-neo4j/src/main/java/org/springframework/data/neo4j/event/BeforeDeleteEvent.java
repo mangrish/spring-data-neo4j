@@ -14,16 +14,16 @@
 package org.springframework.data.neo4j.event;
 
 /**
- * {@link Neo4jDataManipulationEvent} published before a particular entity is deleted.
+ * {@link Neo4jDataEvent} published before a particular entity is deleted.
  *
  * @author Adam George
  */
-public class BeforeDeleteEvent extends Neo4jDataManipulationEvent {
+public class BeforeDeleteEvent extends Neo4jDataEvent {
 
     private static final long serialVersionUID = 1238219872542331942L;
 
-    public BeforeDeleteEvent(Object source, Object entity) {
-        super(source, entity);
+    public BeforeDeleteEvent(Object entity) {
+        super(entity);
     }
 
 }

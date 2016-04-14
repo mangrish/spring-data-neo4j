@@ -11,33 +11,35 @@
  *
  */
 
-package org.springframework.data.neo4j.template.context;
+package org.springframework.data.neo4j.repositories.context;
 
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.event.AfterDeleteEvent;
 import org.springframework.data.neo4j.event.AfterSaveEvent;
 import org.springframework.data.neo4j.event.BeforeDeleteEvent;
 import org.springframework.data.neo4j.event.BeforeSaveEvent;
+import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.data.neo4j.events.TestNeo4jEventListener;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Spring Configuration bean for testing data manipulation events supported by <code>Neo4jTemplate</code>.
- *
- * @author Adam George
- * @author Luanne Misquitta
+ * @author vince
  */
 @Configuration
+@ComponentScan({"org.springframework.data.neo4j.repositories"})
+@EnableNeo4jRepositories("org.springframework.data.neo4j.repositories.repo")
 @EnableTransactionManagement
-public class DataManipulationEventConfiguration extends Neo4jConfiguration {
+public class EventHandlingContext extends Neo4jConfiguration {
 
     @Override
+    @Bean
     public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+        return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
     }
 
     @Bean
@@ -59,5 +61,4 @@ public class DataManipulationEventConfiguration extends Neo4jConfiguration {
     public ApplicationListener<AfterDeleteEvent> afterDeleteEventListener() {
         return new TestNeo4jEventListener<AfterDeleteEvent>() {};
     }
-
 }

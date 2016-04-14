@@ -14,6 +14,10 @@
 package org.springframework.data.neo4j.template;
 
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.cypher.Filters;
 import org.neo4j.ogm.cypher.query.Pagination;
@@ -22,15 +26,12 @@ import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.Utils;
+import org.neo4j.ogm.session.event.EventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.neo4j.event.*;
+import org.springframework.data.neo4j.event.Neo4jDataEventListener;
 import org.springframework.util.Assert;
-
-import java.util.Collection;
-import java.util.Map;
 
 import static org.springframework.data.neo4j.util.IterableUtils.getSingle;
 import static org.springframework.data.neo4j.util.IterableUtils.getSingleOrNull;
@@ -40,22 +41,19 @@ import static org.springframework.data.neo4j.util.IterableUtils.getSingleOrNull;
  * to favour coding against the {@link Neo4jOperations} interface rather than the {@link Neo4jTemplate} directly, as the
  * interface API will be more consistent over time and enhanced proxy objects of the interface may actually be created by Spring
  * for auto-wiring instead of this template.
- * <p>
- * Note that this class also implements {@link ApplicationEventPublisherAware} and will publish events before data manipulation
- * operations - specifically delete and save.
- * </p>
+ *
  * Please note also that all methods on this class throw a {@link DataAccessException} if any underlying {@code Exception} is
  * thrown. Since {@link DataAccessException} is a runtime exception, this is not documented at the method level.
  *
  * @author Adam George
  * @author Michal Bachman
  * @author Luanne Misquitta
+ * @author Vince Bickers
  */
-public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisherAware {
+public class Neo4jTemplate implements Neo4jOperations {
 
     private final Session session;
-    private ApplicationEventPublisher applicationEventPublisher;
-
+    private Map<ApplicationEventPublisher, EventListener> publisherEventListenerMap = new HashMap<>();
     /**
      * Constructs a new {@link Neo4jTemplate} based on the given Neo4j OGM {@link Session}.
      *
@@ -69,7 +67,14 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
+        EventListener eventListener = new Neo4jDataEventListener(applicationEventPublisher);
+        publisherEventListenerMap.put(applicationEventPublisher, eventListener);
+        session.register(eventListener);
+    }
+
+    @Override
+    public boolean removeApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+        return session.dispose(publisherEventListenerMap.get(eventPublisher));
     }
 
     @Override
@@ -169,9 +174,7 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 
     @Override
     public void delete(Object entity) {
-        publishEvent(new BeforeDeleteEvent(this, entity));
         session.delete(entity);
-        publishEvent(new AfterDeleteEvent(this, entity));
     }
 
     @Override
@@ -199,16 +202,12 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 
     @Override
     public <T> T save(T entity) {
-        publishEvent(new BeforeSaveEvent(this, entity));
         session.save(entity);
-        publishEvent(new AfterSaveEvent(this, entity));
         return entity;
     }
 
     public <T> T save(T entity, int depth) {
-        publishEvent(new BeforeSaveEvent(this, entity));
         session.save(entity, depth);
-        publishEvent(new AfterSaveEvent(this, entity));
         return entity;
     }
 
@@ -235,12 +234,6 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
     @Override
     public long count(Class<?> entityClass) {
         return session.countEntitiesOfType(entityClass);
-    }
-
-    private void publishEvent(Neo4jDataManipulationEvent event) {
-        if (this.applicationEventPublisher != null) {
-            this.applicationEventPublisher.publishEvent(event);
-        }
     }
 
 }
