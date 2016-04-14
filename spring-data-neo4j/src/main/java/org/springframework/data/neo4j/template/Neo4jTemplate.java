@@ -22,10 +22,8 @@ import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.cypher.Filters;
 import org.neo4j.ogm.cypher.query.Pagination;
 import org.neo4j.ogm.cypher.query.SortOrder;
-import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.Utils;
 import org.neo4j.ogm.session.event.EventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -184,16 +182,6 @@ public class Neo4jTemplate implements Neo4jOperations {
 
     public <T> void deleteAll(Class<T> type) {
         session.deleteAll(type);
-    }
-
-    @Override
-    public QueryStatistics execute(String jsonStatements) {
-        return session.query(jsonStatements, Utils.map()).queryStatistics();
-    }
-
-    @Override
-    public QueryStatistics execute(String cypher, Map<String, Object> parameters) {
-        return session.query(cypher, parameters).queryStatistics();
     }
 
     public void purgeSession() {

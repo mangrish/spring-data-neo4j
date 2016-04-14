@@ -354,30 +354,4 @@ public interface Neo4jOperations extends Neo4jApplicationPublisherEventAware {
     long count(Class<?> entityClass);
 
 
-    /**
-     * Issue a single Cypher update operation (such as a <tt>CREATE</tt>, <tt>MERGE</tt> or <tt>DELETE</tt> statement).
-     *
-     * @deprecated Use {@link Neo4jOperations}.query() to return both results as well as query statistics.
-     * @param cypherQuery The Cypher query to execute
-     * @return {@link QueryStatistics} representing statistics about graph modifications as a result of the cypher execution.
-     */
-    @Deprecated
-    QueryStatistics execute(String cypherQuery);
-
-    /**
-     * Allows a cypher statement with a modification statement to be executed.
-     *
-     * <p>Parameters may be scalars or domain objects themselves.</p>
-     * @deprecated Use {@link Neo4jOperations}.query() to return both results as well as query statistics.
-     * @param cypher The parametrisable cypher to execute.
-     * @param parameters Any parameters to attach to the cypher. These may be domain objects or scalars. Note that
-     *                   if a complex domain object is provided only the properties of that object will be set.
-     *                   If relationships of a provided object also need to be set then the cypher should reflect this
-     *                   and further domain object parameters provided.
-     *
-     * @return {@link QueryStatistics} representing statistics about graph modifications as a result of the cypher execution.
-     */
-    @Deprecated
-    QueryStatistics execute(String cypher, Map<String, Object> parameters);
-
 }
