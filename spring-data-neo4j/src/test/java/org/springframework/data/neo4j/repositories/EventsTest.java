@@ -16,6 +16,7 @@ package org.springframework.data.neo4j.repositories;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.event.*;
 import org.springframework.data.neo4j.events.TestNeo4jEventListener;
@@ -35,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  */
 @ContextConfiguration(classes = {EventHandlingContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class EventsTest {
+public class EventsTest extends MultiDriverTestClass {
 
     private Folder folder;
     private Document a;
