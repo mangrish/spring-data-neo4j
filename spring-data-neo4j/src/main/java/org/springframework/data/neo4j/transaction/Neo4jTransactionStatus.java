@@ -13,110 +13,113 @@
 
 package org.springframework.data.neo4j.transaction;
 
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
 /**
  * @author Vince Bickers
+ * @author Mark Angrish
  */
 public class Neo4jTransactionStatus implements TransactionStatus {
 
-    private final Logger logger = LoggerFactory.getLogger(Neo4jTransactionStatus.class);
+	private final Logger logger = LoggerFactory.getLogger(Neo4jTransactionStatus.class);
 
-    private final Transaction transaction;
-    private boolean newTransaction = false;
+	private final Transaction transaction;
+	private final boolean readOnly;
+	private boolean newTransaction = false;
+	private boolean debug = false;
+	private boolean newSynchronization;
+	private Object suspendedResources;
 
-    public Neo4jTransactionStatus(Session session, TransactionDefinition transactionDefinition) {
+	Neo4jTransactionStatus(Transaction transaction, boolean newTransaction, boolean newSynchronization, boolean readOnly, boolean debug, Object suspendedResources) {
 
-        Transaction tx;
-        int propagation = transactionDefinition.getPropagationBehavior();
+		this.transaction = transaction;
+		this.newTransaction = newTransaction;
+		this.debug = debug;
+		this.newSynchronization = newSynchronization;
+		this.readOnly = readOnly;
+		this.suspendedResources = suspendedResources;
+	}
 
-        if (propagation == TransactionDefinition.PROPAGATION_REQUIRES_NEW)  {
-            logger.debug("Creating new transaction or extending existing one");
-            tx = session.beginTransaction();
-            newTransaction = true;
-        } else if (propagation == TransactionDefinition.PROPAGATION_REQUIRED) {
-            tx = session.getTransaction();
-            if (tx == null
-                    || tx.status().equals(Transaction.Status.CLOSED)
-                    || tx.status().equals(Transaction.Status.COMMITTED)
-                    || tx.status().equals(Transaction.Status.ROLLEDBACK)) {
-                tx = session.beginTransaction();
-                newTransaction = true;
-                logger.debug("Creating new transaction");
-            } else {
-                logger.debug("Joining existing transaction");
-            }
-        } else {
-            throw new RuntimeException("Transaction propagation type not supported: " + transactionDefinition.getPropagationBehavior());
-        }
+	@Override
+	public boolean isNewTransaction() {
+		logger.debug("isNewTransaction? " + newTransaction);
+		return newTransaction;
+	}
 
-        this.transaction = tx;
-    }
+	@Override
+	public boolean hasSavepoint() {
+		logger.info("hasSavePoint? - false");
+		return false;
+	}
 
-    @Override
-    public boolean isNewTransaction() {
-        logger.debug("isNewTransaction? " + newTransaction);
-        return newTransaction;
-    }
+	@Override
+	public void setRollbackOnly() {
+		logger.info("setRollbackOnly - unsupported");
+	}
 
-    @Override
-    public boolean hasSavepoint() {
-        logger.info("hasSavePoint? - false");
-        return false;
-    }
+	@Override
+	public boolean isRollbackOnly() {
+		logger.info("isRollbackOnly? - false");
+		return false;
+	}
 
-    @Override
-    public void setRollbackOnly() {
-        logger.info("setRollbackOnly - unsupported");
-    }
+	@Override
+	public void flush() {
+		logger.info("flush - unsupported");
+	}
 
-    @Override
-    public boolean isRollbackOnly() {
-        logger.info("isRollbackOnly? - false");
-        return false;
-    }
+	@Override
+	public boolean isCompleted() {
+		boolean completed = transaction.status().equals(Transaction.Status.ROLLEDBACK) ||
+				transaction.status().equals(Transaction.Status.COMMITTED) ||
+				transaction.status().equals(Transaction.Status.CLOSED);
 
-    @Override
-    public void flush() {
-        logger.info("flush - unsupported");
-    }
+		logger.debug("isCompleted? " + completed);
 
-    @Override
-    public boolean isCompleted() {
-        boolean completed = transaction.status().equals(Transaction.Status.ROLLEDBACK) ||
-                transaction.status().equals(Transaction.Status.COMMITTED) ||
-                transaction.status().equals(Transaction.Status.CLOSED);
+		return completed;
+	}
 
-        logger.debug("isCompleted? " + completed);
+	@Override
+	public Object createSavepoint() throws TransactionException {
+		logger.info("createSavepoint - unsupported");
+		return null;
+	}
 
-        return completed;
+	@Override
+	public void rollbackToSavepoint(Object o) throws TransactionException {
+		logger.info("rollbackToSavepoint - unsupported");
+	}
 
+	@Override
+	public void releaseSavepoint(Object o) throws TransactionException {
+		logger.info("releaseSavepoint - unsupported");
+	}
 
-    }
+	public Transaction getTransaction() {
+		return transaction;
+	}
 
-    @Override
-    public Object createSavepoint() throws TransactionException {
-        logger.info("createSavepoint - unsupported");
-        return null;
-    }
+	boolean isDebug() {
+		return debug;
+	}
 
-    @Override
-    public void rollbackToSavepoint(Object o) throws TransactionException {
-        logger.info("rollbackToSavepoint - unsupported");
-    }
+	boolean isNewSynchronization() {
+		return newSynchronization;
+	}
 
-    @Override
-    public void releaseSavepoint(Object o) throws TransactionException {
-        logger.info("releaseSavepoint - unsupported");
-    }
+	boolean hasTransaction() {
+		return transaction != null;
+	}
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
+	boolean isReadOnly() {
+		return readOnly;
+	}
+
+	Object getSuspendedResources() {
+		return suspendedResources;
+	}
 }
