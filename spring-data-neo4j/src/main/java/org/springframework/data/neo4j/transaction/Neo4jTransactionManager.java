@@ -140,6 +140,27 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		return EnumSet.of(Transaction.Status.OPEN, Transaction.Status.ROLLBACK_PENDING, Transaction.Status.COMMIT_PENDING).contains(status);
 	}
 
+	@Override
+	protected Object doSuspend(Object transaction) {
+		Neo4jTransactionObject txObject = (Neo4jTransactionObject) transaction;
+		txObject.setSessionHolder(null, false);
+		SessionHolder entityManagerHolder = (SessionHolder)
+				TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		return new SuspendedResourcesHolder(entityManagerHolder);
+	}
+
+	@Override
+	protected void doResume(Object transaction, Object suspendedResources) {
+		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
+		TransactionSynchronizationManager.bindResource(
+				getSessionFactory(), resourcesHolder.getSessionHolder());
+	}
+
+
+	@Override
+	protected boolean shouldCommitOnGlobalRollbackOnly() {
+		return true;
+	}
 
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
@@ -188,9 +209,39 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 					txObject.getSessionHolder().getSession() + "] rollback-only");
 		}
 		status.setRollbackOnly();
-		txObject.getSessionHolder().setRollbackOnly();
 	}
 
+
+	@Override
+	protected void doCleanupAfterCompletion(Object transaction) {
+		Neo4jTransactionObject txObject = (Neo4jTransactionObject) transaction;
+
+		// Remove the entity manager holder from the thread, if still there.
+		// (Could have been removed by EntityManagerFactoryUtils in order
+		// to replace it with an unsynchronized EntityManager).
+		if (txObject.isNewSessionHolder()) {
+			TransactionSynchronizationManager.unbindResourceIfPossible(getSessionFactory());
+		}
+		txObject.getSessionHolder().clear();
+
+		Transaction rawTransaction = txObject.getRawTransaction();
+
+		if (rawTransaction != null && isActive(rawTransaction.status())) {
+			rawTransaction.close();
+		}
+
+		// Remove the entity manager holder from the thread.
+		if (txObject.isNewSessionHolder()) {
+			Session em = txObject.getSessionHolder().getSession();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing Neo4j Session [" + em + "] after transaction");
+			}
+			em.clear();
+		}
+		else {
+			logger.debug("Not closing pre-bound JPA EntityManager after transaction");
+		}
+	}
 
 	private static boolean canCommit(Transaction tx) {
 		switch (tx.status()) {
@@ -259,5 +310,20 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		public Transaction getRawTransaction() {
 			return this.rawTransaction;
 		}
+	}
+
+	private static class SuspendedResourcesHolder {
+
+		private final SessionHolder sessionHolder;
+
+
+		private SuspendedResourcesHolder(SessionHolder sessionHolder) {
+			this.sessionHolder = sessionHolder;
+		}
+
+		private SessionHolder getSessionHolder() {
+			return this.sessionHolder;
+		}
+
 	}
 }
