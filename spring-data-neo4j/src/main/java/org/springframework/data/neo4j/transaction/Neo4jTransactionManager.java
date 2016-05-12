@@ -59,7 +59,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 	@Override
 	protected boolean isExistingTransaction(Object transaction) {
-		return ((Neo4jTransactionObject) transaction).hasTransaction() && isActive(((Neo4jTransactionObject) transaction).getRawTransaction().status());
+		return ((Neo4jTransactionObject) transaction).hasTransaction();
 	}
 
 
@@ -85,7 +85,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		try {
 			if (txObject.getSessionHolder() == null ||
 					txObject.getSessionHolder().isSynchronizedWithTransaction()) {
-				Session session = getSessionFactory().openSession();
+				Session session = createSessionForTransaction();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + session + "] for Neo4j transaction");
 				}
@@ -113,6 +113,12 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	}
 
 
+	private Session createSessionForTransaction() {
+		SessionFactory sessionFactory = getSessionFactory();
+		return sessionFactory.openSession();
+	}
+
+
 	private void closeSessionAfterFailedBegin(Neo4jTransactionObject txObject) {
 		if (txObject.isNewSessionHolder()) {
 			Session session = txObject.getSessionHolder().getSession();
@@ -121,7 +127,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 					session.getTransaction().rollback();
 				}
 			} catch (Throwable ex) {
-				logger.debug("Could not rollback Session after failed transaction begin", ex);
+				logger.debug("Could not rollback EntityManager after failed transaction begin", ex);
 			} //finally {
 //				session.clear();
 //			}
