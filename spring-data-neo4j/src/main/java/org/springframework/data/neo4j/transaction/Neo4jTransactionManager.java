@@ -39,7 +39,6 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 	public Neo4jTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
-		setTransactionSynchronization(AbstractPlatformTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 	}
 
 
@@ -144,9 +143,9 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	protected Object doSuspend(Object transaction) {
 		Neo4jTransactionObject txObject = (Neo4jTransactionObject) transaction;
 		txObject.setSessionHolder(null, false);
-		SessionHolder entityManagerHolder = (SessionHolder)
+		SessionHolder sessionHolder = (SessionHolder)
 				TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		return new SuspendedResourcesHolder(entityManagerHolder);
+		return new SuspendedResourcesHolder(sessionHolder);
 	}
 
 	@Override

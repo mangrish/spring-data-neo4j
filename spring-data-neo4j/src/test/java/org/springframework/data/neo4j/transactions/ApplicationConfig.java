@@ -13,6 +13,7 @@
 
 package org.springframework.data.neo4j.transactions;
 
+import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,6 +21,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.data.neo4j.transaction.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.data.neo4j.transaction.support.SpringSessionProxyBean;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -32,13 +39,32 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 				pattern = "org\\.springframework\\.data\\.neo4j\\.transactions\\.TransactionalEventListenerTests.*"))
 @EnableTransactionManagement
 @EnableNeo4jRepositories
-public class ApplicationConfig extends Neo4jConfiguration {
+public class ApplicationConfig {
 
-    @Override
-    @Bean
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.transactions");
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) throws Exception {
+		return new Neo4jTransactionManager(sessionFactory);
+	}
+
+	@Bean
+	public SessionFactory sessionFactory() throws Exception {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.transactions");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 
 
+	@Bean
+	public Neo4jTemplate neo4jTemplate(Session session) throws Exception {
+		return new Neo4jTemplate(session);
+	}
+
+	@Bean
+	public Session getSession(SessionFactory sessionFactory) throws Exception {
+		SpringSessionProxyBean proxy = new SpringSessionProxyBean();
+		proxy.setSessionFactory(sessionFactory);
+		proxy.afterPropertiesSet();
+		return proxy.getObject();
+	}
 }
