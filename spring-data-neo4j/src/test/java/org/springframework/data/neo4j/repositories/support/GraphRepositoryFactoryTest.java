@@ -23,7 +23,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
-import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.assertEquals;

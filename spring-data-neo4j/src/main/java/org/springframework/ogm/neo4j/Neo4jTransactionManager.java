@@ -11,7 +11,7 @@
  *
  */
 
-package org.springframework.data.neo4j.transaction;
+package org.springframework.ogm.neo4j;
 
 import java.util.EnumSet;
 

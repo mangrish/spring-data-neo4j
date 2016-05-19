@@ -11,7 +11,7 @@
  *
  */
 
-package org.springframework.data.neo4j.template;
+package org.springframework.ogm.neo4j;
 
 import org.springframework.dao.UncategorizedDataAccessException;
 

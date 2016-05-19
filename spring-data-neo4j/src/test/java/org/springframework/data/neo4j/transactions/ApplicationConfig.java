@@ -19,13 +19,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.template.Neo4jOperations;
-import org.springframework.data.neo4j.template.Neo4jTemplate;
-import org.springframework.data.neo4j.transaction.LocalSessionFactoryBean;
-import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
-import org.springframework.data.neo4j.transaction.support.SpringSessionProxyBean;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
+import org.springframework.ogm.neo4j.LocalSessionFactoryBean;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
+import org.springframework.ogm.neo4j.support.SpringSessionProxyBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 

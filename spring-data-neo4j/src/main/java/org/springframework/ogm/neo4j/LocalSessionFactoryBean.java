@@ -1,4 +1,4 @@
-package org.springframework.data.neo4j.transaction;
+package org.springframework.ogm.neo4j;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.data.neo4j.template.Neo4jOgmExceptionTranslator;
 
 /**
  * Created by markangrish on 14/05/2016.

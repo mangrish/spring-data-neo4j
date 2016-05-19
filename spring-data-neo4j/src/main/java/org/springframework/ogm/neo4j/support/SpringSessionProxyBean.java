@@ -1,11 +1,10 @@
-package org.springframework.data.neo4j.transaction.support;
+package org.springframework.ogm.neo4j.support;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.neo4j.ogm.session.Neo4jSession;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.BeansException;
@@ -13,8 +12,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.data.neo4j.transaction.SessionFactoryUtils;
-import org.springframework.util.Assert;
+import org.springframework.ogm.neo4j.SessionFactoryUtils;
 
 /**
  * Created by markangrish on 14/05/2016.

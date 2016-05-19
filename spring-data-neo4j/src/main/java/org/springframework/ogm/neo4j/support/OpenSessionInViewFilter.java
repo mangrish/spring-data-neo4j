@@ -1,4 +1,4 @@
-package org.springframework.data.neo4j.transaction.support;
+package org.springframework.ogm.neo4j.support;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -8,8 +8,8 @@ import java.io.IOException;
 
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
-import org.springframework.data.neo4j.transaction.SessionFactoryUtils;
-import org.springframework.data.neo4j.transaction.SessionHolder;
+import org.springframework.ogm.neo4j.SessionFactoryUtils;
+import org.springframework.ogm.neo4j.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;

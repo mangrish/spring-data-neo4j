@@ -17,8 +17,8 @@ import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
-import org.springframework.data.neo4j.template.Neo4jOperations;
-import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**

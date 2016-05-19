@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
