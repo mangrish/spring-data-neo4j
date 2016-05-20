@@ -51,6 +51,6 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 
 	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		return Neo4jOgmExceptionTranslator.translateExceptionIfPossible(ex);
+		return SessionFactoryUtils.convertNeo4jAccessExceptionIfPossible(ex);
 	}
 }

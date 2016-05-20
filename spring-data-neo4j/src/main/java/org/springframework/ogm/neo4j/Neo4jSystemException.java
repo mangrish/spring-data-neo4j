@@ -18,11 +18,11 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * @author Luanne Misquitta
  */
-public class UncategorizedGraphStoreException extends UncategorizedDataAccessException{
+public class Neo4jSystemException extends UncategorizedDataAccessException{
 
 	private static final long serialVersionUID = 347947370839580927L;
 
-	public UncategorizedGraphStoreException(String msg, Throwable cause) {
+	public Neo4jSystemException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 }
