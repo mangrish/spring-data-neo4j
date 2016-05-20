@@ -40,7 +40,7 @@ public class Neo4jRepositoryFactory extends RepositoryFactorySupport {
 
 	@Override
 	public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> type) {
-		return new GraphEntityInformation(type);
+		return new Neo4jEntityInformation(type);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class Neo4jRepositoryFactory extends RepositoryFactorySupport {
 
 	@Override
 	protected Class<?> getRepositoryBaseClass(RepositoryMetadata repositoryMetadata) {
-		return GraphRepositoryImpl.class;
+		return DefaultNeo4jRepositoryImpl.class;
 	}
 
 	@Override

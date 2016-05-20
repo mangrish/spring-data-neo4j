@@ -1,6 +1,6 @@
 package org.springframework.data.neo4j.repository.support;
 
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,7 +26,7 @@ public class SessionFactoryProviderBeanDefinition {
 	}
 
 	/**
-	 * Returns the bean name of the {@link BeanDefinition} for the {@link SessionFactory}.
+	 * Returns the bean name of the {@link BeanDefinition} for the {@link SessionFactoryProvider}.
 	 *
 	 * @return
 	 */
@@ -44,7 +44,7 @@ public class SessionFactoryProviderBeanDefinition {
 	}
 
 	/**
-	 * Returns the {@link BeanDefinition} for the {@link SessionFactory}.
+	 * Returns the {@link BeanDefinition} for the {@link SessionFactoryProvider}.
 	 *
 	 * @return
 	 */

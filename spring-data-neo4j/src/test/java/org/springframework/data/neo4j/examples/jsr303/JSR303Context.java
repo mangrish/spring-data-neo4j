@@ -30,16 +30,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class JSR303Context extends Neo4jConfiguration {
 
     @Bean
-    @Override
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.examples.jsr303.domain");
     }
 
-    @Override
-    @Bean
-    @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public Session getSession() throws Exception {
-        return super.getSession();
-    }
+
 
 }

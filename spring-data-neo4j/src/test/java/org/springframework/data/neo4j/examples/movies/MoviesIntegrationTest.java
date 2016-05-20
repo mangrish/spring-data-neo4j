@@ -30,8 +30,6 @@ import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
 import org.springframework.data.neo4j.examples.movies.domain.*;
 import org.springframework.data.neo4j.examples.movies.repo.*;
 import org.springframework.data.neo4j.examples.movies.service.UserService;
-import org.springframework.data.neo4j.server.InProcessServer;
-import org.springframework.data.neo4j.server.Neo4jServer;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

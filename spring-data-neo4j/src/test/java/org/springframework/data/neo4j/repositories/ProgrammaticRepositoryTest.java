@@ -22,7 +22,7 @@ import org.springframework.data.neo4j.repositories.domain.Movie;
 import org.springframework.data.neo4j.repositories.domain.User;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
 import org.springframework.data.neo4j.repositories.repo.UserRepository;
-import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
+import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactory;
 import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.ogm.neo4j.Neo4jTemplate;
 import org.springframework.data.neo4j.util.IterableUtils;
@@ -45,14 +45,14 @@ public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
     @Before
     public void init() {
         session = sessionFactory.openSession();
-        neo4jOperations = new Neo4jTemplate(session);
+        neo4jOperations = new Neo4jTemplate(sessionFactory);
         session.purgeDatabase();
     }
 
     @Test
     public void canInstantiateRepositoryProgrammatically() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
 
         movieRepository = factory.getRepository(MovieRepository.class);
 
@@ -70,7 +70,7 @@ public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
     @Test
     public void shouldBeAbleToDeleteAllViaRepository() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
 
         UserRepository userRepository = factory.getRepository(UserRepository.class);
 

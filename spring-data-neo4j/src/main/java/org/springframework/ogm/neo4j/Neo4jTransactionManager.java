@@ -16,7 +16,7 @@ package org.springframework.ogm.neo4j;
 import java.util.EnumSet;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +35,9 @@ import org.springframework.transaction.support.*;
 public class Neo4jTransactionManager extends AbstractPlatformTransactionManager implements ResourceTransactionManager, InitializingBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Neo4jTransactionManager.class);
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactory;
 
-	public Neo4jTransactionManager(SessionFactory sessionFactory) {
+	public Neo4jTransactionManager(SessionFactoryProvider sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
@@ -45,14 +45,14 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	/**
 	 * Set the SessionFactory that this instance should manage transactions for.
 	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
+	public void setSessionFactory(SessionFactoryProvider sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
 	/**
 	 * Return the EntityManagerFactory that this instance should manage transactions for.
 	 */
-	public SessionFactory getSessionFactory() {
+	public SessionFactoryProvider getSessionFactory() {
 		return this.sessionFactory;
 	}
 
@@ -113,7 +113,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 
 	private Session createSessionForTransaction() {
-		SessionFactory sessionFactory = getSessionFactory();
+		SessionFactoryProvider sessionFactory = getSessionFactory();
 		return sessionFactory.openSession();
 	}
 

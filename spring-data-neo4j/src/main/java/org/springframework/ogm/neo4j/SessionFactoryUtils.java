@@ -3,8 +3,9 @@ package org.springframework.ogm.neo4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.core.Ordered;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -17,13 +18,13 @@ public class SessionFactoryUtils {
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
 
-	public static void releaseSession(Session session, SessionFactory sessionFactory) {
+	public static void releaseSession(Session session, SessionFactoryProvider sessionFactory) {
 		if (session == null) {
 			return;
 		}
 	}
 
-	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate) throws IllegalStateException {
+	public static Session getSession(SessionFactoryProvider sessionFactory, boolean allowCreate) throws IllegalStateException {
 
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 
@@ -61,15 +62,23 @@ public class SessionFactoryUtils {
 		return session;
 	}
 
+	public static DataAccessException convertNeo4jAccessException(Exception ex) {
+		return null;
+	}
+
+	public static void closeSession(Session session) {
+
+	}
+
 
 	private static class SessionSynchronization
-			extends ResourceHolderSynchronization<SessionHolder, SessionFactory>
+			extends ResourceHolderSynchronization<SessionHolder, SessionFactoryProvider>
 			implements Ordered {
 
 		private final boolean newSession;
 
 		public SessionSynchronization(
-				SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
+				SessionHolder sessionHolder, SessionFactoryProvider sessionFactory, boolean newSession) {
 			super(sessionHolder, sessionFactory);
 			this.newSession = newSession;
 		}
@@ -96,7 +105,7 @@ public class SessionFactoryUtils {
 		}
 
 		@Override
-		protected void releaseResource(SessionHolder resourceHolder, SessionFactory resourceKey) {
+		protected void releaseResource(SessionHolder resourceHolder, SessionFactoryProvider resourceKey) {
 			releaseSession(resourceHolder.getSession(), resourceKey);
 		}
 	}

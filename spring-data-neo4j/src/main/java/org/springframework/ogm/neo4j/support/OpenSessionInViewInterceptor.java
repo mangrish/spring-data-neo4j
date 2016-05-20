@@ -3,7 +3,7 @@ package org.springframework.ogm.neo4j.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -23,13 +23,13 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactory;
 
-	public void setSessionFactory(SessionFactory sessionFactory) {
+	public void setSessionFactory(SessionFactoryProvider sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
-	public SessionFactory getSessionFactory() {
+	public SessionFactoryProvider getSessionFactory() {
 		return sessionFactory;
 	}
 
@@ -37,7 +37,7 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getSessionFactory() == null) {
-			sessionFactory = beanFactory.getBean(SessionFactory.class);
+			sessionFactory = beanFactory.getBean(SessionFactoryProvider.class);
 		}
 	}
 

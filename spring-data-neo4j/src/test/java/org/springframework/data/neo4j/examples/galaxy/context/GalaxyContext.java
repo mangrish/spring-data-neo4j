@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class GalaxyContext extends Neo4jConfiguration {
 
     @Bean
-    @Override
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.examples.galaxy.domain");
     }

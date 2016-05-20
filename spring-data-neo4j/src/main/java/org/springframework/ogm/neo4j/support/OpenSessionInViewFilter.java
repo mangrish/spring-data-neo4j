@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.ogm.neo4j.SessionFactoryUtils;
 import org.springframework.ogm.neo4j.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -51,7 +51,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		SessionFactory sessionFactory = lookupSessionFactory(request);
+		SessionFactoryProvider sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
 
 		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
@@ -76,17 +76,17 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 
-	protected SessionFactory lookupSessionFactory(HttpServletRequest request) {
+	protected SessionFactoryProvider lookupSessionFactory(HttpServletRequest request) {
 		return lookupSessionFactory();
 	}
 
 
-	protected SessionFactory lookupSessionFactory() {
+	protected SessionFactoryProvider lookupSessionFactory() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using SessionFactory '" + getSessionFactoryBeanName() +
 					"' for OpenSessionInViewFilter");
 		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return wac.getBean(getSessionFactoryBeanName(), SessionFactory.class);
+		return wac.getBean(getSessionFactoryBeanName(), SessionFactoryProvider.class);
 	}
 }

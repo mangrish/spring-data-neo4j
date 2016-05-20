@@ -32,17 +32,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class ConversionServicePersistenceContext extends Neo4jConfiguration {
 
-    @Override
     @Bean
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.integration.conversion.domain");
     }
 
-    @Override
-    @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
-    }
 
     @Bean
     public ConversionService conversionService() {

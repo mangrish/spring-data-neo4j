@@ -14,14 +14,14 @@
 package org.springframework.data.neo4j.examples.movies.repo;
 
 import org.springframework.data.neo4j.examples.movies.domain.Rating;
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.util.List;
 
 /**
  * @author Luanne Misquitta
  */
-public interface RatingRepository extends GraphRepository<Rating> {
+public interface RatingRepository extends Neo4jRepository<Rating> {
 
 	List<Rating> findByStars(int stars);
 

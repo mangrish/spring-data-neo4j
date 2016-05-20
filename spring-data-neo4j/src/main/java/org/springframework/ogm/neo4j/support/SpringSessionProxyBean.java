@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -19,24 +19,18 @@ import org.springframework.ogm.neo4j.SessionFactoryUtils;
  */
 public class SpringSessionProxyBean implements FactoryBean<Session>, InitializingBean, BeanFactoryAware {
 
-	private SessionFactory sessionFactory;
-
-	private Class<? extends Session> sessionInterface = Session.class;
+	private SessionFactoryProvider sessionFactory;
 
 	private boolean allowCreate = true;
 
 	private Session proxy;
 
-	public void setSessionFactory(SessionFactory sessionFactory) {
+	public void setSessionFactory(SessionFactoryProvider sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 
-	protected SessionFactory getSessionFactory() {
+	protected SessionFactoryProvider getSessionFactory() {
 		return this.sessionFactory;
-	}
-
-	protected Class<? extends Session> getSessionInterface() {
-		return this.sessionInterface;
 	}
 
 	public void setAllowCreate(boolean allowCreate) {
@@ -55,7 +49,7 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 
 		this.proxy = (Session) Proxy.newProxyInstance(
 				getSessionFactory().getClass().getClassLoader(),
-				new Class<?>[]{getSessionInterface()}, new SessionInvocationHandler());
+				new Class<?>[]{Session.class}, new SessionInvocationHandler());
 	}
 
 
@@ -66,7 +60,7 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 
 	@Override
 	public Class<? extends Session> getObjectType() {
-		return getSessionInterface();
+		return Session.class;
 	}
 
 	@Override
@@ -77,7 +71,7 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getSessionFactory() == null) {
-			sessionFactory = beanFactory.getBean(SessionFactory.class);
+			sessionFactory = beanFactory.getBean(SessionFactoryProvider.class);
 		}
 	}
 

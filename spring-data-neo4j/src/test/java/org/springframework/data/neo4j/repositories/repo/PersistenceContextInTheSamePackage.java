@@ -27,16 +27,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableNeo4jRepositories //no package specified, that's the point of this test
 @EnableTransactionManagement
-public class PersistenceContextInTheSamePackage extends Neo4jConfiguration {
+public class PersistenceContextInTheSamePackage  {
 
-    @Override
+    @Bean
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
     }
 
-    @Override
-    @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
-    }
 }

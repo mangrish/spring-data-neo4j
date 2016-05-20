@@ -12,8 +12,8 @@
  */
 package org.springframework.data.neo4j.extensions;
 
-import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
-import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.neo4j.ogm.session.Session;
+import org.springframework.data.neo4j.repository.support.DefaultNeo4jRepositoryImpl;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -23,10 +23,10 @@ import org.springframework.stereotype.Repository;
  * @author Luanne Misquitta
  */
 @Repository
-public class CustomGraphRepositoryImpl<T> extends GraphRepositoryImpl<T> implements CustomGraphRepository<T> {
+public class CustomGraphRepositoryImpl<T> extends DefaultNeo4jRepositoryImpl<T> implements CustomGraphRepository<T> {
 
-    public CustomGraphRepositoryImpl(Class<T> clazz, Neo4jOperations neo4jOperations) {
-        super(clazz, neo4jOperations);
+    public CustomGraphRepositoryImpl(Class<T> clazz, Session session) {
+        super(clazz, session);
     }
 
     @Override

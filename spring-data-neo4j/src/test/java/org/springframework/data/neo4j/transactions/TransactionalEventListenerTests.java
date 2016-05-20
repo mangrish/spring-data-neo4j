@@ -357,11 +357,11 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 		}
 
 		@Bean
-		public CallCountingTransactionManager transactionManager(SessionFactory sessionFactory) {
-			return new CallCountingTransactionManager(sessionFactory);
+		public CallCountingTransactionManager transactionManager() {
+			return new CallCountingTransactionManager(getSessionFactory());
 		}
 
-		@Override
+		@Bean
 		public SessionFactory getSessionFactory() {
 			return new SessionFactory("org.springframework.data.neo4j.transactions.domain");
 		}

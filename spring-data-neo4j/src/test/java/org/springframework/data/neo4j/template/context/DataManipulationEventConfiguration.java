@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DataManipulationEventConfiguration extends Neo4jConfiguration {
 
-    @Override
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
     }

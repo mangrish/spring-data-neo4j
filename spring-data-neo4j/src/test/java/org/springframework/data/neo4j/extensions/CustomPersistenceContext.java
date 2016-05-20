@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class CustomPersistenceContext extends Neo4jConfiguration {
 
-    @Override
     @Bean
     public SessionFactory getSessionFactory() {
         return new SessionFactory("org.springframework.data.neo4j.extensions.domain");

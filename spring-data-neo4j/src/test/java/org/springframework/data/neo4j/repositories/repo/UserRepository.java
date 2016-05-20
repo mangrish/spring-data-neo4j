@@ -14,12 +14,12 @@
 package org.springframework.data.neo4j.repositories.repo;
 
 import org.springframework.data.neo4j.repositories.domain.User;
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author Michal Bachman
  */
 @Repository
-public interface UserRepository extends GraphRepository<User> {
+public interface UserRepository extends Neo4jRepository<User> {
 }

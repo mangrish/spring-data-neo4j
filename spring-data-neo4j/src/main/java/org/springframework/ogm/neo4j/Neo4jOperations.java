@@ -21,6 +21,7 @@ import org.neo4j.ogm.exception.NotFoundException;
 import org.neo4j.ogm.model.Query;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.model.QueryStatistics;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -35,6 +36,8 @@ import java.util.Map;
  */
 @Repository
 public interface Neo4jOperations {
+
+    <T> T execute(Neo4jCallback<T> action) throws DataAccessException;
 
     /**
      * Loads an entity of type T that matches the specified ID to the default depth.

@@ -17,13 +17,13 @@ import javax.annotation.Resource;
 
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.ogm.neo4j.Neo4jTemplate;
-import org.springframework.ogm.neo4j.LocalSessionFactoryBean;
+import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
 import org.springframework.ogm.neo4j.Neo4jTransactionManager;
 import org.springframework.ogm.neo4j.support.OpenSessionInViewInterceptor;
 import org.springframework.ogm.neo4j.support.SpringSessionProxyBean;
@@ -58,25 +58,20 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) throws Exception {
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactory) throws Exception {
 		return new Neo4jTransactionManager(sessionFactory);
 	}
 
 	@Bean
-	public SessionFactory sessionFactory() throws Exception {
-		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+	public SessionFactoryProvider sessionFactory() throws Exception {
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.web.domain");
 		lsfb.afterPropertiesSet();
 		return lsfb.getObject();
 	}
 
 	@Bean
-	public Neo4jTemplate neo4jTemplate(Session session) throws Exception {
-		return new Neo4jTemplate(session);
-	}
-
-	@Bean
-	public Session getSession(SessionFactory sessionFactory) throws Exception {
+	public Session getSession(SessionFactoryProvider sessionFactory) throws Exception {
 		SpringSessionProxyBean proxy = new SpringSessionProxyBean();
 		proxy.setSessionFactory(sessionFactory);
 		proxy.afterPropertiesSet();

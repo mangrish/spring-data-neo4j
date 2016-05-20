@@ -13,24 +13,23 @@
 
 package org.springframework.data.neo4j.repositories.support;
 
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.aop.framework.Advised;
-import org.springframework.data.neo4j.repository.GraphRepository;
-import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
-import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
-import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.support.DefaultNeo4jRepositoryImpl;
+import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 /**
- * Unit tests for {@code GraphRepositoryFactory}.
+ * Unit tests for {@code Neo4jRepositoryFactory}.
  *
  * @author Vince Bickers
  * @author Luanne Misquitta
@@ -38,55 +37,56 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(MockitoJUnitRunner.class)
 public class GraphRepositoryFactoryTest extends MultiDriverTestClass {
 
-    GraphRepositoryFactory factory;
+	Neo4jRepositoryFactory factory;
 
-    @Mock org.neo4j.ogm.session.Session session;
-    @Mock Neo4jOperations neo4jOperations;
+	@Mock org.neo4j.ogm.session.Session session;
 
-    @Before
-    public void setUp() {
+	@Before
+	public void setUp() {
 
-        factory = new GraphRepositoryFactory(session, neo4jOperations) {
+		factory = new Neo4jRepositoryFactory(session) {
 
-        };
-    }
+		};
+	}
 
-    /**
-     * Assert that the instance created for the standard configuration is a valid {@code UserRepository}.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void setsUpBasicInstanceCorrectly() throws Exception {
-        assertNotNull(factory.getRepository(ObjectRepository.class));
-    }
+	/**
+	 * Assert that the instance created for the standard configuration is a valid {@code UserRepository}.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void setsUpBasicInstanceCorrectly() throws Exception {
+		assertNotNull(factory.getRepository(ObjectRepository.class));
+	}
 
-    @Test
-    public void allowsCallingOfObjectMethods() {
+	@Test
+	public void allowsCallingOfObjectMethods() {
 
-        ObjectRepository repository = factory.getRepository(ObjectRepository.class);
+		ObjectRepository repository = factory.getRepository(ObjectRepository.class);
 
-        repository.hashCode();
-        repository.toString();
-        repository.equals(repository);
-    }
+		repository.hashCode();
+		repository.toString();
+		repository.equals(repository);
+	}
 
-    @Test
-    public void usesConfiguredRepositoryBaseClass() {
-        factory.setRepositoryBaseClass(CustomGraphRepository.class);
-        ObjectRepository repository = factory.getRepository(ObjectRepository.class);
-        assertEquals(CustomGraphRepository.class, ((Advised) repository).getTargetClass());
-    }
+	@Test
+	public void usesConfiguredRepositoryBaseClass() {
+		factory.setRepositoryBaseClass(CustomGraphRepository.class);
+		ObjectRepository repository = factory.getRepository(ObjectRepository.class);
+		assertEquals(CustomGraphRepository.class, ((Advised) repository).getTargetClass());
+	}
 
-    private interface ObjectRepository extends GraphRepository<Object> {
-        @Override
-        @Transactional
-        Object findOne(Long id);
-    }
+	private interface ObjectRepository extends Neo4jRepository<Object> {
 
-    static class CustomGraphRepository<T> extends GraphRepositoryImpl<T> {
-        public CustomGraphRepository(Class<T> clazz, Neo4jOperations neo4jOperations) {
-            super(clazz, neo4jOperations);
-        }
-    }
+		@Override
+		@Transactional
+		Object findOne(Long id);
+	}
+
+	static class CustomGraphRepository<T> extends DefaultNeo4jRepositoryImpl<T> {
+
+		public CustomGraphRepository(Class<T> clazz, Session session) {
+			super(clazz, session);
+		}
+	}
 }

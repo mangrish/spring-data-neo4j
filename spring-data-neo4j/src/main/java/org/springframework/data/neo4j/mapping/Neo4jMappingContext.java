@@ -25,6 +25,8 @@ import org.springframework.data.util.TypeInformation;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
 
@@ -60,7 +62,6 @@ public class Neo4jMappingContext extends AbstractMappingContext<Neo4jPersistentE
                 logger.error("Failed to load class: " + classInfo.name() + " named in ClassInfo due to exception", e);
             }
         }
-
         logger.info("Neo4jMappingContext initialisation completed");
     }
 
