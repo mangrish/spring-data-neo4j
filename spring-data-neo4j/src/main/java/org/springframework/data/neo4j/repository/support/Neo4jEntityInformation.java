@@ -20,9 +20,9 @@ import java.io.Serializable;
 /**
  * @author Mark Angrish
  */
-public class GraphEntityInformation<ID extends Serializable, T> extends AbstractEntityInformation<T, Long> {
+public class Neo4jEntityInformation<ID extends Serializable, T> extends AbstractEntityInformation<T, Long> {
 
-    public GraphEntityInformation(Class<T> type) {
+    public Neo4jEntityInformation(Class<T> type) {
         super(type);
     }
 
