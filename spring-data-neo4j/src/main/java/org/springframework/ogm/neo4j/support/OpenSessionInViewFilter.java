@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactoryProvider;
-import org.springframework.ogm.neo4j.SessionFactoryUtils;
+import org.springframework.ogm.neo4j.SessionFactoryProviderUtils;
 import org.springframework.ogm.neo4j.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
@@ -59,7 +59,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		} else {
 			logger.debug("Opening Neo4j Session in OpenSessionInViewFilter");
-			Session session = SessionFactoryUtils.getSession(sessionFactoryProvider, true);
+			Session session = SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
 			TransactionSynchronizationManager.bindResource(sessionFactoryProvider, new SessionHolder(session));
 		}
 
@@ -70,7 +70,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				SessionHolder pmHolder = (SessionHolder)
 						TransactionSynchronizationManager.unbindResource(sessionFactoryProvider);
 				logger.debug("Closing Neo4j Session in OpenSessionInViewFilter");
-				SessionFactoryUtils.releaseSession(pmHolder.getSession(), sessionFactoryProvider);
+				SessionFactoryProviderUtils.releaseSession(pmHolder.getSession(), sessionFactoryProvider);
 			}
 		}
 	}

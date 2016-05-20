@@ -15,9 +15,9 @@ import org.springframework.util.Assert;
 /**
  * Created by markangrish on 14/05/2016.
  */
-public class SessionFactoryUtils {
+public class SessionFactoryProviderUtils {
 
-	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
+	private static final Log logger = LogFactory.getLog(SessionFactoryProviderUtils.class);
 
 
 	public static void releaseSession(Session session, SessionFactoryProvider sessionFactoryProvider) {

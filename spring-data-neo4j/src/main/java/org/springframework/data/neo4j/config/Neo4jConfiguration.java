@@ -31,7 +31,7 @@ import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
 import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.ogm.neo4j.Neo4jTemplate;
 import org.springframework.ogm.neo4j.Neo4jTransactionManager;
-import org.springframework.ogm.neo4j.SessionFactoryUtils;
+import org.springframework.ogm.neo4j.SessionFactoryProviderUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
@@ -73,7 +73,7 @@ public abstract class Neo4jConfiguration {
 			@Override
 			public DataAccessException translateExceptionIfPossible(RuntimeException e) {
 				logger.info("Intercepted exception");
-				return SessionFactoryUtils.convertNeo4jAccessExceptionIfPossible(e);
+				return SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(e);
 			}
 		};
 	}

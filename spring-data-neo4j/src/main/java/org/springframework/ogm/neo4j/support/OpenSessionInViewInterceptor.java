@@ -7,7 +7,7 @@ import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.ogm.neo4j.SessionFactoryUtils;
+import org.springframework.ogm.neo4j.SessionFactoryProviderUtils;
 import org.springframework.ogm.neo4j.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
@@ -51,7 +51,7 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 			webRequest.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		} else {
 			logger.debug("Opening Neo4j Session in OpenSessionInViewInterceptor");
-			Session session = SessionFactoryUtils.getSession(getSessionFactoryProvider(), true);
+			Session session = SessionFactoryProviderUtils.getSession(getSessionFactoryProvider(), true);
 			TransactionSynchronizationManager.bindResource(
 					getSessionFactoryProvider(), new SessionHolder(session));
 		}
@@ -77,7 +77,7 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 			SessionHolder pmHolder = (SessionHolder)
 					TransactionSynchronizationManager.unbindResource(getSessionFactoryProvider());
 			logger.debug("Closing Noe4j Session in OpenSessionInViewInterceptor");
-			SessionFactoryUtils.releaseSession(
+			SessionFactoryProviderUtils.releaseSession(
 					pmHolder.getSession(), getSessionFactoryProvider());
 		}
 	}

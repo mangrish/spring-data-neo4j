@@ -12,7 +12,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.ogm.neo4j.SessionFactoryUtils;
+import org.springframework.ogm.neo4j.SessionFactoryProviderUtils;
 
 /**
  * Created by markangrish on 14/05/2016.
@@ -99,14 +99,14 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 			}
 
 			// Invoke method on target PersistenceManager.
-			Session session = SessionFactoryUtils.getSession(
+			Session session = SessionFactoryProviderUtils.getSession(
 					getSessionFactoryProvider(), isAllowCreate());
 			try {
 				return method.invoke(session, args);
 			} catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			} finally {
-				SessionFactoryUtils.releaseSession(session, getSessionFactoryProvider());
+				SessionFactoryProviderUtils.releaseSession(session, getSessionFactoryProvider());
 			}
 		}
 	}
