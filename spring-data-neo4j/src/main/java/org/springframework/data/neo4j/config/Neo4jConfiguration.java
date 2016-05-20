@@ -26,10 +26,10 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
-import org.springframework.data.neo4j.template.Neo4jOgmExceptionTranslator;
-import org.springframework.data.neo4j.template.Neo4jOperations;
-import org.springframework.data.neo4j.template.Neo4jTemplate;
-import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.ogm.neo4j.Neo4jOgmExceptionTranslator;
+import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 

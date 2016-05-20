@@ -11,51 +11,33 @@
  *
  */
 
-package org.springframework.data.neo4j.web.context;
-
-import javax.annotation.Resource;
+package org.springframework.ogm.neo4j.transactions;
 
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.ogm.neo4j.Neo4jTemplate;
 import org.springframework.ogm.neo4j.LocalSessionFactoryBean;
 import org.springframework.ogm.neo4j.Neo4jTransactionManager;
-import org.springframework.ogm.neo4j.support.OpenSessionInViewInterceptor;
 import org.springframework.ogm.neo4j.support.SpringSessionProxyBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * @author Michal Bachman
+ * @author Vince Bickers
  */
 @Configuration
-@EnableWebMvc
-@ComponentScan({"org.springframework.data.neo4j.web"})
-@EnableNeo4jRepositories("org.springframework.data.neo4j.web.repo")
+@ComponentScan(basePackages = "org.springframework.ogm.neo4j.transactions",
+		excludeFilters =@ComponentScan.Filter(
+				type = FilterType.REGEX,
+				pattern = "org\\.springframework\\.data\\.neo4j\\.transactions\\.TransactionalEventListenerTests.*"))
 @EnableTransactionManagement
-public class WebAppContext extends WebMvcConfigurerAdapter {
-
-	@Resource
-	private Environment environment;
-
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		try {
-			interceptor.setSessionFactory(sessionFactory());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		registry.addWebRequestInterceptor(interceptor);
-	}
+@EnableNeo4jRepositories
+public class ApplicationConfig {
 
 	@Bean
 	public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) throws Exception {
@@ -65,10 +47,11 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
 	@Bean
 	public SessionFactory sessionFactory() throws Exception {
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
-		lsfb.setPackagesToScan("org.springframework.data.neo4j.web.domain");
+		lsfb.setPackagesToScan("org.springframework.ogm.neo4j.transactions");
 		lsfb.afterPropertiesSet();
 		return lsfb.getObject();
 	}
+
 
 	@Bean
 	public Neo4jTemplate neo4jTemplate(Session session) throws Exception {

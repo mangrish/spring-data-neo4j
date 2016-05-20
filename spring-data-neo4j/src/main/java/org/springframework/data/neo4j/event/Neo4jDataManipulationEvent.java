@@ -14,7 +14,7 @@
 package org.springframework.data.neo4j.event;
 
 import org.springframework.context.ApplicationEvent;
-import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
 
 /**
  * A Spring {@link ApplicationEvent} that gets published by {@link Neo4jTemplate} to notify interested parties about data

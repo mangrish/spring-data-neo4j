@@ -13,7 +13,7 @@
 package org.springframework.data.neo4j.extensions;
 
 import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
-import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.stereotype.Repository;
 
 /**
