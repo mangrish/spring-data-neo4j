@@ -22,7 +22,7 @@ public class Neo4jSystemException extends UncategorizedDataAccessException{
 
 	private static final long serialVersionUID = 347947370839580927L;
 
-	public Neo4jSystemException(String msg, Throwable cause) {
-		super(msg, cause);
+	public Neo4jSystemException(RuntimeException ex) {
+		super(ex.getMessage(), ex);
 	}
 }

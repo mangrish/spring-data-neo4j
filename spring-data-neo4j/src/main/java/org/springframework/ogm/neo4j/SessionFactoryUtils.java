@@ -90,7 +90,7 @@ public class SessionFactoryUtils {
 		if (ex instanceof TransactionManagerException || ex instanceof EntityAccessException
 				|| ex instanceof TransactionException || ex instanceof ServiceNotFoundException
 				|| ex instanceof ResultProcessingException || ex instanceof ResultErrorsException) {
-			return new Neo4jSystemException(ex.getMessage(), ex);
+			return new Neo4jSystemException(ex);
 		}
 
 		// If we get here, we have an exception that resulted from user code,
