@@ -13,14 +13,15 @@
 
 package org.springframework.data.neo4j.examples.movies.context;
 
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -30,17 +31,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan({"org.springframework.data.neo4j.examples.movies"})
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.movies.repo")
 @EnableTransactionManagement
-public class MoviesContext extends Neo4jConfiguration {
+public class MoviesContext {
 
-	@Override
 	@Bean
-	public SessionFactoryProvider sessionFactoryProvider() {
-		return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
+		return new Neo4jTransactionManager(sessionFactoryProvider);
 	}
 
-	@Override
 	@Bean
-	public Session session() throws Exception {
-		return super.session();
+	public SessionFactoryProvider sessionFactoryProvider() {
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
 	}
 }

@@ -45,24 +45,17 @@ public class ApplicationConfig {
 	}
 
 	@Bean
-	public SessionFactoryProvider getSessionFactoryProvider() {
+	public SessionFactoryProvider sessionFactoryProvider() {
 		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
 		lsfb.setPackagesToScan("org.springframework.ogm.neo4j.transactions");
 		lsfb.afterPropertiesSet();
 		return lsfb.getObject();
 	}
 
+//
+//	@Bean
+//	public Neo4jTemplate neo4jTemplate(Session session) throws Exception {
+//		return new Neo4jTemplate(sessionFactoryProvider());
+//	}
 
-	@Bean
-	public Neo4jTemplate neo4jTemplate(Session session) throws Exception {
-		return new Neo4jTemplate(session);
-	}
-
-	@Bean
-	public Session getSession(SessionFactoryProvider sessionFactoryProvider) throws Exception {
-		SpringSessionProxyBean proxy = new SpringSessionProxyBean();
-		proxy.setSessionFactoryProvider(sessionFactoryProvider);
-		proxy.afterPropertiesSet();
-		return proxy.getObject();
-	}
 }

@@ -13,13 +13,18 @@
 
 package org.springframework.data.neo4j.examples.friends.context;
 
+import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
+import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -29,11 +34,23 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.friends.repo")
 @ComponentScan({"org.springframework.data.neo4j.examples.friends"})
 @EnableTransactionManagement
-public class FriendContext extends Neo4jConfiguration {
+public class FriendContext {
 
 	@Bean
-	@Override
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(sessionFactoryProvider());
+	}
+
+	@Bean
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
+		return new Neo4jTransactionManager(sessionFactoryProvider);
+	}
+
+	@Bean
 	public SessionFactoryProvider sessionFactoryProvider() {
-		return new SessionFactory("org.springframework.data.neo4j.examples.friends.domain");
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.friends.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
 	}
 }

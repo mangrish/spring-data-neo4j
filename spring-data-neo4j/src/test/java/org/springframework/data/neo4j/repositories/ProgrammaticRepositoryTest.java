@@ -13,6 +13,9 @@
 
 package org.springframework.data.neo4j.repositories;
 
+import static org.junit.Assert.*;
+import static org.neo4j.ogm.testutil.GraphTestUtils.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
@@ -24,13 +27,10 @@ import org.springframework.data.neo4j.repositories.domain.User;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
 import org.springframework.data.neo4j.repositories.repo.UserRepository;
 import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactory;
-import org.springframework.ogm.neo4j.Neo4jOperations;
-import org.springframework.ogm.neo4j.Neo4jTemplate;
 import org.springframework.data.neo4j.util.IterableUtils;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-
-import static org.junit.Assert.assertEquals;
-import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
+import org.springframework.ogm.neo4j.Neo4jOperations;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
 
 /**
  * @author Michal Bachman
@@ -38,52 +38,51 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
  */
 public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
 
-    private MovieRepository movieRepository;
-    private SessionFactoryProvider sessionFactoryProvider = new SessionFactory("org.springframework.data.neo4j.repositories.domain");
-    private Session session;
-    private Neo4jOperations neo4jOperations;
+	private MovieRepository movieRepository;
+	private SessionFactoryProvider sessionFactoryProvider = new SessionFactory("org.springframework.data.neo4j.repositories.domain");
+	private Session session;
+	private Neo4jOperations neo4jOperations;
 
-    @Before
-    public void init() {
-        session = sessionFactoryProvider.openSession();
-        neo4jOperations = new Neo4jTemplate(session);
-        session.purgeDatabase();
-    }
+	@Before
+	public void init() {
+		session = sessionFactoryProvider.openSession();
+		neo4jOperations = new Neo4jTemplate(sessionFactoryProvider);
+		session.purgeDatabase();
+	}
 
-    @Test
-    public void canInstantiateRepositoryProgrammatically() {
+	@Test
+	public void canInstantiateRepositoryProgrammatically() {
 
-        RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
+		RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
 
-        movieRepository = factory.getRepository(MovieRepository.class);
+		movieRepository = factory.getRepository(MovieRepository.class);
 
-        Movie movie = new Movie("PF");
-        movieRepository.save(movie);
+		Movie movie = new Movie("PF");
+		movieRepository.save(movie);
 
-        assertSameGraph(getGraphDatabaseService(), "CREATE (m:Movie {title:'PF'})");
+		assertSameGraph(getGraphDatabaseService(), "CREATE (m:Movie {title:'PF'})");
 
-        assertEquals(1, IterableUtils.count(movieRepository.findAll()));
-    }
+		assertEquals(1, IterableUtils.count(movieRepository.findAll()));
+	}
 
 	/**
-     * @see DATAGRAPH-847
-     */
-    @Test
-    public void shouldBeAbleToDeleteAllViaRepository() {
+	 * @see DATAGRAPH-847
+	 */
+	@Test
+	public void shouldBeAbleToDeleteAllViaRepository() {
 
-        RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
+		RepositoryFactorySupport factory = new Neo4jRepositoryFactory(session);
 
-        UserRepository userRepository = factory.getRepository(UserRepository.class);
+		UserRepository userRepository = factory.getRepository(UserRepository.class);
 
-        User userA = new User("A");
-        User userB = new User("B");
-        userRepository.save(userA);
-        userRepository.save(userB);
+		User userA = new User("A");
+		User userB = new User("B");
+		userRepository.save(userA);
+		userRepository.save(userB);
 
-        assertEquals(2, userRepository.count());
+		assertEquals(2, userRepository.count());
 
-        userRepository.deleteAll();
-        assertEquals(0, userRepository.count());
-    }
-
+		userRepository.deleteAll();
+		assertEquals(0, userRepository.count());
+	}
 }

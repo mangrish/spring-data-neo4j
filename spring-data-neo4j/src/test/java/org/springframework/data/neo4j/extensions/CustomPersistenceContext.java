@@ -16,12 +16,10 @@ import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- *
  * Note how the repository base class for all our repositories is overridden
  * using the 'repositoryBaseClass' attribute.
  * This annotation change allows all our repositories to easily extend one or more
@@ -32,12 +30,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableNeo4jRepositories(repositoryBaseClass = CustomGraphRepositoryImpl.class)
 @EnableTransactionManagement
-public class CustomPersistenceContext extends Neo4jConfiguration {
+public class CustomPersistenceContext {
 
-    @Override
-    @Bean
-    public SessionFactoryProvider sessionFactoryProvider() {
-        return new SessionFactory("org.springframework.data.neo4j.extensions.domain");
-    }
-
+	@Bean
+	public SessionFactoryProvider sessionFactoryProvider() {
+		return new SessionFactory("org.springframework.data.neo4j.extensions.domain");
+	}
 }

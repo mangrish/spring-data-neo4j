@@ -345,7 +345,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class BasicConfiguration extends Neo4jConfiguration {
+	static class BasicConfiguration  {
 
 		@Bean // set automatically with tx management
 		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
@@ -362,7 +362,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 			return new CallCountingTransactionManager(sessionFactoryProvider);
 		}
 
-		@Override
+		@Bean
 		public SessionFactoryProvider sessionFactoryProvider() {
 			return new SessionFactory("org.springframework.ogm.neo4j.transactions.domain");
 		}

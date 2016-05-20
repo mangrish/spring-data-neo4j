@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
  * @author Vince Bickers
  */
 @Configuration
+@Deprecated
 public abstract class Neo4jConfiguration {
 
 	private final Logger logger = LoggerFactory.getLogger(Neo4jConfiguration.class);
@@ -58,7 +59,7 @@ public abstract class Neo4jConfiguration {
 
 	@Bean
 	public Neo4jOperations neo4jTemplate() throws Exception {
-		return new Neo4jTemplate(session());
+		return new Neo4jTemplate(sessionFactoryProvider());
 	}
 
 	@Bean

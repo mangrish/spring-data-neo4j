@@ -29,9 +29,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan({"org.springframework.data.neo4j.repositories"})
 @EnableNeo4jRepositories("org.springframework.data.neo4j.repositories.repo")
 @EnableTransactionManagement
-public class RepositoriesTestContext extends Neo4jConfiguration {
+public class RepositoriesTestContext {
 
-	@Override
 	@Bean
 	public SessionFactoryProvider sessionFactoryProvider() {
 		return new SessionFactory("org.springframework.data.neo4j.repositories.domain");

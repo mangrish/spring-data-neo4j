@@ -13,11 +13,11 @@
 
 package org.springframework.data.neo4j.examples.jsr303;
 
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
-import org.springframework.context.annotation.*;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -28,19 +28,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.jsr303.repo")
 @EnableTransactionManagement
-public class JSR303Context extends Neo4jConfiguration {
+public class JSR303Context {
 
-    @Bean
-    @Override
-    public SessionFactoryProvider sessionFactoryProvider() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.jsr303.domain");
-    }
-
-    @Override
-    @Bean
-    @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public Session session() throws Exception {
-        return super.session();
-    }
-
+	@Bean
+	public SessionFactoryProvider sessionFactoryProvider() {
+		return new SessionFactory("org.springframework.data.neo4j.examples.jsr303.domain");
+	}
 }

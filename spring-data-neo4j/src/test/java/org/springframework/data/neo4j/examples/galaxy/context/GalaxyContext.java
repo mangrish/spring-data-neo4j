@@ -13,14 +13,15 @@
 
 package org.springframework.data.neo4j.examples.galaxy.context;
 
-import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -31,11 +32,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @PropertySource("classpath:helloworld.properties")
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.galaxy.repo")
 @EnableTransactionManagement
-public class GalaxyContext extends Neo4jConfiguration {
+public class GalaxyContext {
 
 	@Bean
-	@Override
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
+		return new Neo4jTransactionManager(sessionFactoryProvider);
+	}
+
+	@Bean
 	public SessionFactoryProvider sessionFactoryProvider() {
-		return new SessionFactory("org.springframework.data.neo4j.examples.galaxy.domain");
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.galaxy.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
 	}
 }

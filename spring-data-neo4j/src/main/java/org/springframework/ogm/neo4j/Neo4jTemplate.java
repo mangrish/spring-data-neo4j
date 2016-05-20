@@ -16,6 +16,10 @@ package org.springframework.ogm.neo4j;
 
 import static org.springframework.data.neo4j.util.IterableUtils.*;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map;
 
@@ -26,7 +30,9 @@ import org.neo4j.ogm.cypher.query.SortOrder;
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.session.Utils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -50,20 +56,29 @@ import org.springframework.util.Assert;
  * @author Michal Bachman
  * @author Luanne Misquitta
  */
-public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisherAware {
+public class Neo4jTemplate implements Neo4jOperations, InitializingBean, ApplicationEventPublisherAware {
 
-	private final Session session;
+	private SessionFactoryProvider sessionFactoryProvider;
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * Constructs a new {@link Neo4jTemplate} based on the given Neo4j OGM {@link Session}.
 	 *
-	 * @param session The Neo4j OGM session upon which to base the template
+	 * @param sessionFactoryProvider The Neo4j OGM sessionFactoryProvider upon which to base the template
 	 */
 	@Autowired
-	public Neo4jTemplate(Session session) {
-		Assert.notNull(session, "Cannot create a Neo4jTemplate without a Session!");
-		this.session = session;
+	public Neo4jTemplate(SessionFactoryProvider sessionFactoryProvider) {
+		Assert.notNull(sessionFactoryProvider, "Cannot create a Neo4jTemplate without a SessionFactoryProvider!");
+		this.sessionFactoryProvider = sessionFactoryProvider;
+	}
+
+	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
+	}
+
+
+	public SessionFactoryProvider getSessionFactoryProvider() {
+		return this.sessionFactoryProvider;
 	}
 
 	@Override
@@ -72,10 +87,31 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 	}
 
 	@Override
+	public void afterPropertiesSet() {
+		if (getSessionFactoryProvider() == null) {
+			throw new IllegalArgumentException("Property 'sessionFactoryProvider' is required");
+		}
+	}
+
+	@Override
 	public <T> T execute(Neo4jCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
+		Session session = SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
 
-		return action.doInNeo4j(session);
+		try {
+			Session sessionToExpose = createSessionProxy(session);
+			return action.doInNeo4j(sessionToExpose);
+		} catch (RuntimeException ex) {
+			// Callback code threw application exception...
+			throw ex;
+		}
+	}
+
+
+	protected Session createSessionProxy(Session session) {
+		return (Session) Proxy.newProxyInstance(
+				session.getClass().getClassLoader(), new Class<?>[]{Session.class},
+				new CloseSuppressingInvocationHandler(session));
 	}
 
 	@Override
@@ -371,6 +407,35 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 	private void publishEvent(Neo4jDataManipulationEvent event) {
 		if (this.applicationEventPublisher != null) {
 			this.applicationEventPublisher.publishEvent(event);
+		}
+	}
+
+	private class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private final Session target;
+
+		public CloseSuppressingInvocationHandler(Session target) {
+			this.target = target;
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Invocation on Session interface coming in...
+
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0]);
+			} else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Session proxy.
+				return System.identityHashCode(proxy);
+			}
+
+			// Invoke method on target Session.
+			try {
+				return method.invoke(this.target, args);
+			} catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
 		}
 	}
 }
