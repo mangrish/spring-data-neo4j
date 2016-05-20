@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.annotations.EntityAccessException;
 import org.neo4j.ogm.exception.*;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.core.Ordered;
 import org.springframework.dao.*;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
@@ -20,24 +20,24 @@ public class SessionFactoryUtils {
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
 
-	public static void releaseSession(Session session, SessionFactory sessionFactory) {
+	public static void releaseSession(Session session, SessionFactoryProvider sessionFactoryProvider) {
 		if (session == null) {
 			return;
 		}
 	}
 
-	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate) throws IllegalStateException {
+	public static Session getSession(SessionFactoryProvider sessionFactoryProvider, boolean allowCreate) throws IllegalStateException {
 
-		Assert.notNull(sessionFactory, "No SessionFactory specified");
+		Assert.notNull(sessionFactoryProvider, "No SessionFactoryProvider specified");
 
 		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactoryProvider);
 		if (sessionHolder != null) {
 			if (!sessionHolder.isSynchronizedWithTransaction() &&
 					TransactionSynchronizationManager.isSynchronizationActive()) {
 				sessionHolder.setSynchronizedWithTransaction(true);
 				TransactionSynchronizationManager.registerSynchronization(
-						new SessionSynchronization(sessionHolder, sessionFactory, false));
+						new SessionSynchronization(sessionHolder, sessionFactoryProvider, false));
 			}
 			return sessionHolder.getSession();
 		}
@@ -48,7 +48,7 @@ public class SessionFactoryUtils {
 		}
 
 		logger.debug("Opening Neo4j Session");
-		Session session = sessionFactory.openSession();
+		Session session = sessionFactoryProvider.openSession();
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for Neo4j Session");
@@ -57,8 +57,8 @@ public class SessionFactoryUtils {
 			sessionHolder = new SessionHolder(session);
 			sessionHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(
-					new SessionSynchronization(sessionHolder, sessionFactory, true));
-			TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+					new SessionSynchronization(sessionHolder, sessionFactoryProvider, true));
+			TransactionSynchronizationManager.bindResource(sessionFactoryProvider, sessionHolder);
 		}
 
 		return session;
@@ -101,14 +101,14 @@ public class SessionFactoryUtils {
 
 
 	private static class SessionSynchronization
-			extends ResourceHolderSynchronization<SessionHolder, SessionFactory>
+			extends ResourceHolderSynchronization<SessionHolder, SessionFactoryProvider>
 			implements Ordered {
 
 		private final boolean newSession;
 
 		public SessionSynchronization(
-				SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
-			super(sessionHolder, sessionFactory);
+				SessionHolder sessionHolder, SessionFactoryProvider sessionFactoryProvider, boolean newSession) {
+			super(sessionHolder, sessionFactoryProvider);
 			this.newSession = newSession;
 		}
 
@@ -134,7 +134,7 @@ public class SessionFactoryUtils {
 		}
 
 		@Override
-		protected void releaseResource(SessionHolder resourceHolder, SessionFactory resourceKey) {
+		protected void releaseResource(SessionHolder resourceHolder, SessionFactoryProvider resourceKey) {
 			releaseSession(resourceHolder.getSession(), resourceKey);
 		}
 	}

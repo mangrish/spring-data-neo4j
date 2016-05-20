@@ -14,6 +14,7 @@
 package org.springframework.ogm.neo4j.template.context;
 
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DataManipulationEventConfiguration extends Neo4jConfiguration {
 
     @Override
-    public SessionFactory getSessionFactory() {
+    public SessionFactoryProvider getSessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
     }
 

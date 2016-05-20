@@ -14,6 +14,7 @@
 package org.springframework.data.neo4j.examples.friends.context;
 
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -30,10 +31,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class FriendContext extends Neo4jConfiguration {
 
-    @Bean
-    @Override
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.friends.domain");
-    }
-
+	@Bean
+	@Override
+	public SessionFactoryProvider getSessionFactoryProvider() {
+		return new SessionFactory("org.springframework.data.neo4j.examples.friends.domain");
+	}
 }

@@ -14,6 +14,7 @@ package org.springframework.data.neo4j.integration.conversion;
 
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
@@ -34,7 +35,7 @@ public class ConversionServicePersistenceContext extends Neo4jConfiguration {
 
     @Override
     @Bean
-    public SessionFactory getSessionFactory() {
+    public SessionFactoryProvider getSessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.integration.conversion.domain");
     }
 
@@ -46,6 +47,6 @@ public class ConversionServicePersistenceContext extends Neo4jConfiguration {
 
     @Bean
     public ConversionService conversionService() {
-        return new MetaDataDrivenConversionService(getSessionFactory().metaData());
+        return new MetaDataDrivenConversionService(getSessionFactoryProvider().metaData());
     }
 }

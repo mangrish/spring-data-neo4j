@@ -13,7 +13,7 @@
 
 package org.springframework.data.neo4j.repository.support;
 
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
 import org.springframework.ogm.neo4j.Neo4jOperations;
@@ -30,19 +30,19 @@ import org.springframework.data.repository.core.support.TransactionalRepositoryF
 public class Neo4jRepositoryFactoryBean<S extends Repository<T, Long>, T> extends TransactionalRepositoryFactoryBeanSupport<S, T, Long> {
 
     @Autowired
-    private SessionFactory sessionFactory;
+    private SessionFactoryProvider sessionFactoryProvider;
 
     @Autowired
     private Neo4jOperations neo4jOperations;
 
     @Override
     public void afterPropertiesSet() {
-        setMappingContext(new Neo4jMappingContext(sessionFactory.metaData()));
+        setMappingContext(new Neo4jMappingContext(sessionFactoryProvider.metaData()));
         super.afterPropertiesSet();
     }
 
     @Override
     protected RepositoryFactorySupport doCreateRepositoryFactory() {
-        return new Neo4jRepositoryFactory(SessionFactoryUtils.getSession(sessionFactory, true), neo4jOperations);
+        return new Neo4jRepositoryFactory(SessionFactoryUtils.getSession(sessionFactoryProvider, true), neo4jOperations);
     }
 }

@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -357,12 +358,12 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 		}
 
 		@Bean
-		public CallCountingTransactionManager transactionManager(SessionFactory sessionFactory) {
-			return new CallCountingTransactionManager(sessionFactory);
+		public CallCountingTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) {
+			return new CallCountingTransactionManager(sessionFactoryProvider);
 		}
 
 		@Override
-		public SessionFactory getSessionFactory() {
+		public SessionFactoryProvider getSessionFactoryProvider() {
 			return new SessionFactory("org.springframework.ogm.neo4j.transactions.domain");
 		}
 	}
@@ -572,8 +573,8 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 		public int rollbacks;
 		public int inflight;
 
-		public CallCountingTransactionManager(SessionFactory session) {
-			super(session);
+		public CallCountingTransactionManager(SessionFactoryProvider sessionFactoryProvider) {
+			super(sessionFactoryProvider);
 		}
 
 

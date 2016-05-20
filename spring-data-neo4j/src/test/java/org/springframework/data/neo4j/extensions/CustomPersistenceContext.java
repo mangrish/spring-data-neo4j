@@ -13,6 +13,7 @@
 package org.springframework.data.neo4j.extensions;
 
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
@@ -35,7 +36,7 @@ public class CustomPersistenceContext extends Neo4jConfiguration {
 
     @Override
     @Bean
-    public SessionFactory getSessionFactory() {
+    public SessionFactoryProvider getSessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.extensions.domain");
     }
 

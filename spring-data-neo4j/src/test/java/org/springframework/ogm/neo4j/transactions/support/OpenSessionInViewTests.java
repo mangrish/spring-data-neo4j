@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.ogm.neo4j.support.OpenSessionInViewFilter;
 import org.springframework.ogm.neo4j.support.OpenSessionInViewInterceptor;
 import org.springframework.mock.web.*;
@@ -31,14 +31,14 @@ public class OpenSessionInViewTests {
 
 	private Session session;
 
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactoryProvider;
 
 
 	@Before
 	public void setUp() throws Exception {
-		sessionFactory = mock(SessionFactory.class);
+		sessionFactoryProvider = mock(SessionFactoryProvider.class);
 		session = mock(Session.class);
-		given(sessionFactory.openSession()).willReturn(session);
+		given(sessionFactoryProvider.openSession()).willReturn(session);
 
 	}
 
@@ -54,12 +54,12 @@ public class OpenSessionInViewTests {
 	public void testOpenPersistenceManagerInViewInterceptor() throws Exception {
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sessionFactory);
+		interceptor.setSessionFactoryProvider(sessionFactoryProvider);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		interceptor.preHandle(new ServletWebRequest(request));
-		assertTrue(TransactionSynchronizationManager.hasResource(sessionFactory));
+		assertTrue(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
 
 		// check that further invocations simply participate
 		interceptor.preHandle(new ServletWebRequest(request));
@@ -76,12 +76,12 @@ public class OpenSessionInViewTests {
 		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		interceptor.postHandle(new ServletWebRequest(request), null);
-		assertTrue(TransactionSynchronizationManager.hasResource(sessionFactory));
+		assertTrue(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
 
 		assertNotNull(session);
 
 		interceptor.afterCompletion(new ServletWebRequest(request), null);
-		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactory));
+		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
 
 	}
 
@@ -89,16 +89,16 @@ public class OpenSessionInViewTests {
 	@Test
 	public void testOpenPersistenceManagerInViewFilter() throws Exception {
 
-		final SessionFactory sessionFactory2 = mock(SessionFactory.class);
+		final SessionFactoryProvider sessionFactoryProvider2 = mock(SessionFactoryProvider.class);
 		Session session2 = mock(Session.class);
 
-		given(sessionFactory2.openSession()).willReturn(session2);
+		given(sessionFactoryProvider2.openSession()).willReturn(session2);
 
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sessionFactory);
-		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sessionFactory2);
+		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactoryProvider", sessionFactoryProvider);
+		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactoryProvider", sessionFactoryProvider2);
 		wac.refresh();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -106,7 +106,7 @@ public class OpenSessionInViewTests {
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
-		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
+		filterConfig2.addInitParameter("sessionFactoryProviderBeanName", "mySessionFactoryProvider");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
@@ -116,7 +116,7 @@ public class OpenSessionInViewTests {
 		final FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
-				assertTrue(TransactionSynchronizationManager.hasResource(sessionFactory));
+				assertTrue(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}
 		};
@@ -125,18 +125,18 @@ public class OpenSessionInViewTests {
 			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
 					throws IOException, ServletException {
-				assertTrue(TransactionSynchronizationManager.hasResource(sessionFactory2));
+				assertTrue(TransactionSynchronizationManager.hasResource(sessionFactoryProvider2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};
 
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
-		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactory));
-		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactory2));
+		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
+		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactoryProvider2));
 		filter2.doFilter(request, response, filterChain3);
-		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactory));
-		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactory2));
+		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactoryProvider));
+		assertFalse(TransactionSynchronizationManager.hasResource(sessionFactoryProvider2));
 		assertNotNull(request.getAttribute("invoked"));
 
 		wac.close();

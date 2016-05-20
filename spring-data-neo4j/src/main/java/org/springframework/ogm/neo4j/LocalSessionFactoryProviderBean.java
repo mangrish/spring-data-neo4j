@@ -3,6 +3,7 @@ package org.springframework.ogm.neo4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -12,12 +13,12 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 /**
  * Created by markangrish on 14/05/2016.
  */
-public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
+public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFactoryProvider>,
 		InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
-	protected final Log logger = LogFactory.getLog(LocalSessionFactoryBean.class);
+	protected final Log logger = LogFactory.getLog(LocalSessionFactoryProviderBean.class);
 
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactoryProvider;
 	private String[] packagesToScan;
 
 	public void setPackagesToScan(String... packagesToScan) {
@@ -29,13 +30,13 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 	}
 
 	@Override
-	public SessionFactory getObject() throws Exception {
-		return sessionFactory;
+	public SessionFactoryProvider getObject() {
+		return sessionFactoryProvider;
 	}
 
 	@Override
-	public Class<? extends SessionFactory> getObjectType() {
-		return sessionFactory.getClass();
+	public Class<? extends SessionFactoryProvider> getObjectType() {
+		return sessionFactoryProvider.getClass();
 	}
 
 	@Override
@@ -44,9 +45,9 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet()  {
 		logger.info("Building new Neo4j SessionFactory");
-		this.sessionFactory = new SessionFactory(packagesToScan);
+		this.sessionFactoryProvider = new SessionFactory(packagesToScan);
 	}
 
 	@Override

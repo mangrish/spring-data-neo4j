@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -19,7 +19,7 @@ import org.springframework.ogm.neo4j.SessionFactoryUtils;
  */
 public class SpringSessionProxyBean implements FactoryBean<Session>, InitializingBean, BeanFactoryAware {
 
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactoryProvider;
 
 	private Class<? extends Session> sessionInterface = Session.class;
 
@@ -27,12 +27,12 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 
 	private Session proxy;
 
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
 	}
 
-	protected SessionFactory getSessionFactory() {
-		return this.sessionFactory;
+	protected SessionFactoryProvider getSessionFactoryProvider() {
+		return this.sessionFactoryProvider;
 	}
 
 	protected Class<? extends Session> getSessionInterface() {
@@ -49,12 +49,12 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 
 	@Override
 	public void afterPropertiesSet() {
-		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("Property 'sessionFactory' is required");
+		if (getSessionFactoryProvider() == null) {
+			throw new IllegalArgumentException("Property 'sessionFactoryProvider' is required");
 		}
 
 		this.proxy = (Session) Proxy.newProxyInstance(
-				getSessionFactory().getClass().getClassLoader(),
+				getSessionFactoryProvider().getClass().getClassLoader(),
 				new Class<?>[]{getSessionInterface()}, new SessionInvocationHandler());
 	}
 
@@ -76,8 +76,8 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getSessionFactory() == null) {
-			sessionFactory = beanFactory.getBean(SessionFactory.class);
+		if (getSessionFactoryProvider() == null) {
+			sessionFactoryProvider = beanFactory.getBean(SessionFactoryProvider.class);
 		}
 	}
 
@@ -95,21 +95,18 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 				return System.identityHashCode(proxy);
 			} else if (method.getName().equals("toString")) {
 				// Deliver toString without touching a target EntityManager.
-				return "Spring Session proxy for target factory [" + getSessionFactory() + "]";
-			} else if (method.getName().equals("getSessionFactory")) {
-				// Return PersistenceManagerFactory without creating a PersistenceManager.
-				return getSessionFactory();
+				return "Spring Session proxy for target factory [" + getSessionFactoryProvider() + "]";
 			}
 
 			// Invoke method on target PersistenceManager.
 			Session session = SessionFactoryUtils.getSession(
-					getSessionFactory(), isAllowCreate());
+					getSessionFactoryProvider(), isAllowCreate());
 			try {
 				return method.invoke(session, args);
 			} catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			} finally {
-				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+				SessionFactoryUtils.releaseSession(session, getSessionFactoryProvider());
 			}
 		}
 	}

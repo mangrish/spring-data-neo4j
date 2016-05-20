@@ -1,7 +1,7 @@
 package org.springframework.ogm.neo4j.transactions;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.transaction.Transaction;
 
 /**
@@ -9,7 +9,7 @@ import org.neo4j.ogm.transaction.Transaction;
  */
 public class Neo4jTransactionManagerTests {
 
-	private SessionFactory factory;
+	private SessionFactoryProvider factory;
 
 	private Session session;
 
