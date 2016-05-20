@@ -23,7 +23,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author Vince Bickers
  */
 @NoRepositoryBean
-public interface GraphRepository<T> extends PagingAndSortingRepository<T, Long> {
+public interface Neo4jRepository<T> extends PagingAndSortingRepository<T, Long> {
 
     <S extends T> S save(S s, int depth);
 

@@ -14,7 +14,6 @@
 package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.session.Session;
-import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
 import org.springframework.data.neo4j.repository.query.GraphQueryLookupStrategy;
 import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.data.repository.core.EntityInformation;
@@ -30,19 +29,19 @@ import java.io.Serializable;
  * @author Vince Bickers
  * @author Luanne Misquitta
  */
-public class GraphRepositoryFactory extends RepositoryFactorySupport {
+public class Neo4jRepositoryFactory extends RepositoryFactorySupport {
 
     private final Session session;
     private final Neo4jOperations neo4jOperations;
 
-    public GraphRepositoryFactory(Session session, Neo4jOperations neo4jOperations) {
+    public Neo4jRepositoryFactory(Session session, Neo4jOperations neo4jOperations) {
         this.session = session;
         this.neo4jOperations = neo4jOperations;
     }
 
     @Override
     public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> type) {
-        return new GraphEntityInformation(type);
+        return new Neo4jEntityInformation(type);
     }
 
     @Override
@@ -52,7 +51,7 @@ public class GraphRepositoryFactory extends RepositoryFactorySupport {
 
     @Override
     protected Class<?> getRepositoryBaseClass(RepositoryMetadata repositoryMetadata) {
-        return GraphRepositoryImpl.class;
+        return DefaultNeo4jRepositoryImpl.class;
     }
 
     @Override

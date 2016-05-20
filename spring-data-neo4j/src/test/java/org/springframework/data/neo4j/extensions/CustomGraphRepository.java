@@ -12,7 +12,7 @@
  */
 package org.springframework.data.neo4j.extensions;
 
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -22,7 +22,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @author: Vince Bickers
  */
 @NoRepositoryBean
-public interface CustomGraphRepository<T> extends GraphRepository<T> {
+public interface CustomGraphRepository<T> extends Neo4jRepository<T> {
 
     boolean sharedCustomMethod();
 

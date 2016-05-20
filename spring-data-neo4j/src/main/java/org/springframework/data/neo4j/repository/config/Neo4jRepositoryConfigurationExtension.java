@@ -13,7 +13,7 @@
 
 package org.springframework.data.neo4j.repository.config;
 
-import org.springframework.data.neo4j.repository.support.GraphRepositoryFactoryBean;
+import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactoryBean;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 
 /**
@@ -23,7 +23,7 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
 
     @Override
     public String getRepositoryFactoryClassName() {
-        return GraphRepositoryFactoryBean.class.getName();
+        return Neo4jRepositoryFactoryBean.class.getName();
     }
 
     @Override

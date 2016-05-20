@@ -15,7 +15,7 @@ package org.springframework.data.neo4j.examples.movies.repo;
 
 import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.examples.movies.domain.Cinema;
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -26,7 +26,7 @@ import java.util.List;
  * @author Luanne Misquitta
  */
 @Repository
-public interface CinemaRepository extends GraphRepository<Cinema> {
+public interface CinemaRepository extends Neo4jRepository<Cinema> {
 
 	Collection<Cinema> findByName(String name);
 

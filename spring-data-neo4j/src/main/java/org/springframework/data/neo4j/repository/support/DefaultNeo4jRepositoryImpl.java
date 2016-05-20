@@ -11,7 +11,7 @@
  *
  */
 
-package org.springframework.data.neo4j.repository;
+package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.cypher.query.Pagination;
 import org.neo4j.ogm.cypher.query.SortOrder;
@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.stereotype.Repository;
 
@@ -31,14 +32,14 @@ import java.util.List;
  * @author Luanne Misquitta
  */
 @Repository
-public class GraphRepositoryImpl<T> implements GraphRepository<T> {
+public class DefaultNeo4jRepositoryImpl<T> implements Neo4jRepository<T> {
 
     private static final int DEFAULT_QUERY_DEPTH = 1;
 
     private final Class<T> clazz;
     private final Neo4jOperations neo4jOperations;
 
-    public GraphRepositoryImpl(Class<T> clazz, Neo4jOperations neo4jOperations) {
+    public DefaultNeo4jRepositoryImpl(Class<T> clazz, Neo4jOperations neo4jOperations) {
         this.clazz = clazz;
         this.neo4jOperations = neo4jOperations;
     }

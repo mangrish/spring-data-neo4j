@@ -16,12 +16,12 @@ package org.springframework.data.neo4j.examples.movies.repo;
 import java.util.Collection;
 
 import org.springframework.data.neo4j.examples.movies.domain.Person;
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Luanne Misquitta
  */
-public interface PersonRepository<T extends Person> extends GraphRepository<T> {
+public interface PersonRepository<T extends Person> extends Neo4jRepository<T> {
 
 	Collection<T> findByName(String name);
 }

@@ -27,7 +27,7 @@ import org.springframework.data.repository.core.support.TransactionalRepositoryF
  * @author Vince Bickers
  * @author Luanne Misquitta
  */
-public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extends TransactionalRepositoryFactoryBeanSupport<S, T, Long> {
+public class Neo4jRepositoryFactoryBean<S extends Repository<T, Long>, T> extends TransactionalRepositoryFactoryBeanSupport<S, T, Long> {
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -43,6 +43,6 @@ public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extend
 
     @Override
     protected RepositoryFactorySupport doCreateRepositoryFactory() {
-        return new GraphRepositoryFactory(SessionFactoryUtils.getSession(sessionFactory, true), neo4jOperations);
+        return new Neo4jRepositoryFactory(SessionFactoryUtils.getSession(sessionFactory, true), neo4jOperations);
     }
 }
