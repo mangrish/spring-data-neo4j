@@ -216,12 +216,12 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory getSessionFactoryProvider() {
+//            public SessionFactory sessionFactoryProvider() {
 //                return new SessionFactory(packages);
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        session = configuration.session();
 //
 //
 //    }
@@ -237,12 +237,12 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory getSessionFactoryProvider() {
+//            public SessionFactory sessionFactoryProvider() {
 //                return new SessionFactory(packages);
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        session = configuration.session();
 //    }
 //
 //    private void initWithEmbeddedCredentials(final String url, final String... packages) throws Exception {
@@ -256,11 +256,11 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory getSessionFactoryProvider() {
+//            public SessionFactory sessionFactoryProvider() {
 //                return new SessionFactory(packages);
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        session = configuration.session();
 //    }
 }

@@ -35,18 +35,18 @@ public class ConversionServicePersistenceContext extends Neo4jConfiguration {
 
     @Override
     @Bean
-    public SessionFactoryProvider getSessionFactoryProvider() {
+    public SessionFactoryProvider sessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.integration.conversion.domain");
     }
 
     @Override
     @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
+    public Session session() throws Exception {
+        return super.session();
     }
 
     @Bean
     public ConversionService conversionService() {
-        return new MetaDataDrivenConversionService(getSessionFactoryProvider().metaData());
+        return new MetaDataDrivenConversionService(sessionFactoryProvider().metaData());
     }
 }

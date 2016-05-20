@@ -13,11 +13,13 @@
 
 package org.springframework.data.neo4j.repository.config;
 
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.repository.support.Neo4jRepositoryFactoryBean;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.lang.annotation.*;
 
@@ -95,8 +97,33 @@ public @interface EnableNeo4jRepositories {
      Class<?> repositoryBaseClass() default DefaultRepositoryBaseClass.class;
 
     /**
+     * Configures the name of the {@link SessionFactoryProvider} bean definition to be used to create repositories
+     * discovered through this annotation. Defaults to {@code sessionFactoryProvider}.
+     *
+     * @return
+     */
+    String sessionFactoryProviderRef() default "sessionFactoryProvider";
+
+    /**
+     * Configures the name of the {@link PlatformTransactionManager} bean definition to be used to create repositories
+     * discovered through this annotation. Defaults to {@code transactionManager}.
+     *
+     * @return
+     */
+    String transactionManagerRef() default "transactionManager";
+
+    /**
      * Configures whether nested repository-interfaces (e.g. defined as inner classes) should be discovered by the
      * repositories infrastructure.
      */
     boolean considerNestedRepositories() default false;
+
+    /**
+     * Configures whether to enable default transactions for Spring Data Neo4j repositories. Defaults to {@literal true}. If
+     * disabled, repositories must be used behind a facade that's configuring transactions (e.g. using Spring's annotation
+     * driven transaction facilities) or repository methods have to be used to demarcate transactions.
+     *
+     * @return whether to enable default transactions, defaults to {@literal true}.
+     */
+    boolean enableDefaultTransactions() default true;
 }

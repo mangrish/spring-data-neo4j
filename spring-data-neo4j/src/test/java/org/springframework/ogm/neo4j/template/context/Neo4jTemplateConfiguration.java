@@ -31,13 +31,13 @@ public class Neo4jTemplateConfiguration extends Neo4jConfiguration {
 
     @Override
     @Bean
-    public SessionFactoryProvider getSessionFactoryProvider() {
+    public SessionFactoryProvider sessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
     }
 
     @Bean
     public Neo4jOperations template() throws Exception {
-        return new Neo4jTemplate(getSession());
+        return new Neo4jTemplate(session());
     }
 
 }

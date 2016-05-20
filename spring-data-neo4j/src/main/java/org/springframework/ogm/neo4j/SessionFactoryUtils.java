@@ -119,7 +119,7 @@ public class SessionFactoryUtils {
 
 		@Override
 		public void flushResource(SessionHolder resourceHolder) {
-//			resourceHolder.getSession().clear();
+//			resourceHolder.session().clear();
 		}
 
 		@Override
@@ -129,7 +129,7 @@ public class SessionFactoryUtils {
 
 		@Override
 		protected boolean shouldReleaseAfterCompletion(SessionHolder resourceHolder) {
-//			return !resourceHolder.getSession().isClosed();
+//			return !resourceHolder.session().isClosed();
 			return false;
 		}
 

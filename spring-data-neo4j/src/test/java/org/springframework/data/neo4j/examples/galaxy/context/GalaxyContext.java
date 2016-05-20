@@ -35,7 +35,7 @@ public class GalaxyContext extends Neo4jConfiguration {
 
 	@Bean
 	@Override
-	public SessionFactoryProvider getSessionFactoryProvider() {
+	public SessionFactoryProvider sessionFactoryProvider() {
 		return new SessionFactory("org.springframework.data.neo4j.examples.galaxy.domain");
 	}
 }

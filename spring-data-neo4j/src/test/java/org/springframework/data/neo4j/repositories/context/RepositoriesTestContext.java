@@ -33,7 +33,7 @@ public class RepositoriesTestContext extends Neo4jConfiguration {
 
 	@Override
 	@Bean
-	public SessionFactoryProvider getSessionFactoryProvider() {
+	public SessionFactoryProvider sessionFactoryProvider() {
 		return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
 	}
 }

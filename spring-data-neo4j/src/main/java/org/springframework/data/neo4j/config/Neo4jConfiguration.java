@@ -49,21 +49,21 @@ public abstract class Neo4jConfiguration {
 	private Environment environment;
 
 	@Bean
-	public Session getSession() throws Exception {
+	public Session session() throws Exception {
 		logger.info("Initialising Neo4jSession");
-		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
+		SessionFactoryProvider sessionFactoryProvider = sessionFactoryProvider();
 		Assert.notNull(sessionFactoryProvider, "You must provide a SessionFactoryProvider instance in your Spring configuration classes");
 		return sessionFactoryProvider.openSession();
 	}
 
 	@Bean
 	public Neo4jOperations neo4jTemplate() throws Exception {
-		return new Neo4jTemplate(getSession());
+		return new Neo4jTemplate(session());
 	}
 
 	@Bean
 	public Neo4jMappingContext neo4jMappingContext() throws Exception {
-		return new Neo4jMappingContext(getSessionFactoryProvider().metaData());
+		return new Neo4jMappingContext(sessionFactoryProvider().metaData());
 	}
 
 	@Bean
@@ -87,7 +87,7 @@ public abstract class Neo4jConfiguration {
 	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {
 		logger.info("Initialising Neo4jTransactionManager");
-		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
+		SessionFactoryProvider sessionFactoryProvider = sessionFactoryProvider();
 		Assert.notNull(sessionFactoryProvider, "You must provide a SessionFactoryProvider instance in your Spring configuration classes");
 		return new Neo4jTransactionManager(sessionFactoryProvider);
 	}
@@ -99,5 +99,5 @@ public abstract class Neo4jConfiguration {
 	}
 
 	@Bean
-	public abstract SessionFactoryProvider getSessionFactoryProvider();
+	public abstract SessionFactoryProvider sessionFactoryProvider();
 }

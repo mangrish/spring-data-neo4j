@@ -116,8 +116,8 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 
 	private Session createSessionForTransaction() {
-		SessionFactoryProvider sessionFactory = getSessionFactoryProvider();
-		return sessionFactory.openSession();
+		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
+		return sessionFactoryProvider.openSession();
 	}
 
 
