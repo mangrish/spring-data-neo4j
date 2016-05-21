@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
 
 @ContextConfiguration(classes = DataManipulationEventConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-@Transactional
 @DirtiesContext
 public class ExceptionTranslationTest extends MultiDriverTestClass {
 
@@ -44,6 +43,7 @@ public class ExceptionTranslationTest extends MultiDriverTestClass {
     }
 
     @Test(expected= InvalidDataAccessApiUsageException.class)
+    @Transactional
     public void testTemplateExceptionsAreIntercepted() {
         neo4jTemplate.loadAll(Rating.class, 0);
 

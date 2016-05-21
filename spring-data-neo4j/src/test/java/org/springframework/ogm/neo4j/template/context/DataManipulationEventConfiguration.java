@@ -15,14 +15,18 @@ package org.springframework.ogm.neo4j.template.context;
 
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.event.AfterDeleteEvent;
 import org.springframework.data.neo4j.event.AfterSaveEvent;
 import org.springframework.data.neo4j.event.BeforeDeleteEvent;
 import org.springframework.data.neo4j.event.BeforeSaveEvent;
+import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
+import org.springframework.ogm.neo4j.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
 import org.springframework.ogm.neo4j.template.TestNeo4jEventListener;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -33,32 +37,47 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
+@EnableNeo4jRepositories
 public class DataManipulationEventConfiguration {
 
-	public SessionFactoryProvider sessionFactoryProvider() {
-		return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+	@Bean
+	public Neo4jTemplate neo4jTemplate() {
+		return new Neo4jTemplate(sessionFactoryProvider());
 	}
 
 	@Bean
-	public ApplicationListener<BeforeSaveEvent> beforeSaveEventListener() {
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
+		return new Neo4jTransactionManager(sessionFactoryProvider);
+	}
+
+	@Bean
+	public SessionFactoryProvider sessionFactoryProvider() {
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
+
+	@Bean
+	public TestNeo4jEventListener<BeforeSaveEvent> beforeSaveEventListener() {
 		return new TestNeo4jEventListener<BeforeSaveEvent>() {
 		};
 	}
 
 	@Bean
-	public ApplicationListener<AfterSaveEvent> afterSaveEventListener() {
+	public TestNeo4jEventListener<AfterSaveEvent> afterSaveEventListener() {
 		return new TestNeo4jEventListener<AfterSaveEvent>() {
 		};
 	}
 
 	@Bean
-	public ApplicationListener<BeforeDeleteEvent> beforeDeleteEventListener() {
+	public TestNeo4jEventListener<BeforeDeleteEvent> beforeDeleteEventListener() {
 		return new TestNeo4jEventListener<BeforeDeleteEvent>() {
 		};
 	}
 
 	@Bean
-	public ApplicationListener<AfterDeleteEvent> afterDeleteEventListener() {
+	public TestNeo4jEventListener<AfterDeleteEvent> afterDeleteEventListener() {
 		return new TestNeo4jEventListener<AfterDeleteEvent>() {
 		};
 	}
