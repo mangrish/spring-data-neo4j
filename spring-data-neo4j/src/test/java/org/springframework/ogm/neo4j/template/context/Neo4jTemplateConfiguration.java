@@ -13,14 +13,15 @@
 
 package org.springframework.ogm.neo4j.template.context;
 
-import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
+import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.ogm.neo4j.LocalSessionFactoryProviderBean;
 import org.springframework.ogm.neo4j.Neo4jOperations;
 import org.springframework.ogm.neo4j.Neo4jTemplate;
+import org.springframework.ogm.neo4j.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -28,21 +29,25 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-public class Neo4jTemplateConfiguration  {
+@EnableNeo4jRepositories
+public class Neo4jTemplateConfiguration {
+
+	@Bean
+	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
+		return new Neo4jTransactionManager(sessionFactoryProvider);
+	}
+
+	@Bean
+	public SessionFactoryProvider sessionFactoryProvider() {
+		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 
 
-    @Bean
-    public SessionFactoryProvider sessionFactoryProvider() {
-        LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
-        lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
-        lsfb.afterPropertiesSet();
-        return lsfb.getObject();
-    }
-
-
-    @Bean
-    public Neo4jOperations template() throws Exception {
-        return new Neo4jTemplate(sessionFactoryProvider());
-    }
-
+	@Bean
+	public Neo4jOperations template() throws Exception {
+		return new Neo4jTemplate(sessionFactoryProvider());
+	}
 }
