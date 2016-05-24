@@ -99,20 +99,13 @@ public abstract class SharedSessionCreator {
 			Session target = SessionFactoryProviderUtils.getSession(
 					this.targetProvider, this.synchronizedWithTransaction);
 
-			if (method.getName().equals("getTargetEntityManager")) {
+			if (method.getName().equals("getTargetSession")) {
 				// Handle EntityManagerProxy interface.
 				if (target == null) {
-					throw new IllegalStateException("No transactional EntityManager available");
+					throw new IllegalStateException("No transactional Session available");
 				}
 				return target;
-			} else if (method.getName().equals("unwrap")) {
-				// We need a transactional target now.
-				if (target == null) {
-					throw new IllegalStateException("No transactional EntityManager available");
-				}
-				// Still perform unwrap call on target EntityManager.
 			}
-
 			// Invoke method on current EntityManager.
 			try {
 				return method.invoke(target, args);

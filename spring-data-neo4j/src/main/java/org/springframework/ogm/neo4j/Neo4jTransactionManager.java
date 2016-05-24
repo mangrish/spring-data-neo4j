@@ -21,9 +21,11 @@ import org.neo4j.ogm.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
@@ -177,6 +179,13 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 				throw new RuntimeException("Cannot commit transaction: " + tx + ", status: " + tx.status());
 			}
 			tx.commit();
+		} catch (RuntimeException re) {
+			DataAccessException dae = SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(re);
+			if (dae != null) {
+				throw dae;
+			} else {
+				throw new TransactionSystemException("Could not commit Neo4j transaction", re);
+			}
 		}
 	}
 
@@ -193,6 +202,13 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 				throw new RuntimeException("Cannot roll back transaction: " + tx + ", status: " + tx.status());
 			}
 			tx.rollback();
+		} catch (RuntimeException re) {
+			DataAccessException dae = SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(re);
+			if (dae != null) {
+				throw dae;
+			} else {
+				throw new TransactionSystemException("Could not commit Neo4j transaction", re);
+			}
 		} finally {
 			if (!txObject.isNewSessionHolder()) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.
@@ -267,7 +283,9 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
+		if (getSessionFactoryProvider() == null) {
+			throw new IllegalArgumentException("'sessionFactoryProvider' is required");
+		}
 	}
 
 	@Override

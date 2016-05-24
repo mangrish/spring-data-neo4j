@@ -72,13 +72,13 @@ public class SessionBeanDefinitionRegistrarPostProcessor  implements BeanFactory
 			builder.setFactoryMethod("createSharedSession");
 			builder.addConstructorArgReference(definition.getBeanName());
 
-			AbstractBeanDefinition emBeanDefinition = builder.getRawBeanDefinition();
+			AbstractBeanDefinition sessionBeanDefinition = builder.getRawBeanDefinition();
 
-			emBeanDefinition.addQualifier(new AutowireCandidateQualifier(Qualifier.class, definition.getBeanName()));
-			emBeanDefinition.setScope(definition.getBeanDefinition().getScope());
-			emBeanDefinition.setSource(definition.getBeanDefinition().getSource());
+			sessionBeanDefinition.addQualifier(new AutowireCandidateQualifier(Qualifier.class, definition.getBeanName()));
+			sessionBeanDefinition.setScope(definition.getBeanDefinition().getScope());
+			sessionBeanDefinition.setSource(definition.getBeanDefinition().getSource());
 
-			BeanDefinitionReaderUtils.registerWithGeneratedName(emBeanDefinition,
+			BeanDefinitionReaderUtils.registerWithGeneratedName(sessionBeanDefinition,
 					(BeanDefinitionRegistry) definition.getBeanFactory());
 		}
 	}
