@@ -40,6 +40,7 @@ import javax.annotation.Resource;
  *
  * @author Vince Bickers
  */
+@Deprecated
 @Configuration
 public abstract class Neo4jConfiguration {
 
