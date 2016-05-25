@@ -26,7 +26,8 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
-import org.springframework.data.neo4j.template.Neo4jOgmExceptionTranslator;
+import org.springframework.data.neo4j.support.Neo4jOgmExceptionTranslator;
+import org.springframework.data.neo4j.support.SharedSessionCreator;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
@@ -54,12 +55,12 @@ public abstract class Neo4jConfiguration {
         logger.info("Initialising Neo4jSession");
         SessionFactory sessionFactory = getSessionFactory();
         Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
-        return sessionFactory.openSession();
+        return SharedSessionCreator.createSharedSession(sessionFactory);
     }
 
     @Bean
     public Neo4jOperations neo4jTemplate() throws Exception {
-        return new Neo4jTemplate(getSession());
+        return new Neo4jTemplate(getSessionFactory());
     }
 
     @Bean
@@ -102,4 +103,8 @@ public abstract class Neo4jConfiguration {
     @Bean
     public abstract SessionFactory getSessionFactory();
 
+    @Bean
+    public SessionFactory sessionFactoryProvider() {
+        return getSessionFactory();
+    }
 }

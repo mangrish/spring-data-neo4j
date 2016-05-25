@@ -33,11 +33,9 @@ import java.io.Serializable;
 public class GraphRepositoryFactory extends RepositoryFactorySupport {
 
     private final Session session;
-    private final Neo4jOperations neo4jOperations;
 
-    public GraphRepositoryFactory(Session session, Neo4jOperations neo4jOperations) {
+    public GraphRepositoryFactory(Session session) {
         this.session = session;
-        this.neo4jOperations = neo4jOperations;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class GraphRepositoryFactory extends RepositoryFactorySupport {
 
     @Override
     protected Object getTargetRepository(RepositoryInformation information) {
-        return getTargetRepositoryViaReflection(information, information.getDomainType(), neo4jOperations);
+        return getTargetRepositoryViaReflection(information, information.getDomainType(), session);
     }
 
     @Override

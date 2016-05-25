@@ -11,14 +11,19 @@
  *
  */
 
-package org.springframework.data.neo4j.server;
+package org.springframework.data.neo4j.support;
+
+
+import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
- * @author Michal Bachman
  * @author Luanne Misquitta
  */
-public interface Neo4jServer {
-    String url();
-    String username();
-    String password();
+public class Neo4jSystemException extends UncategorizedDataAccessException{
+
+	private static final long serialVersionUID = 347947370839580927L;
+
+	public Neo4jSystemException(RuntimeException ex) {
+		super(ex.getMessage(), ex);
+	}
 }

@@ -16,15 +16,21 @@ package org.springframework.data.neo4j.transaction;
 import java.util.EnumSet;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.support.*;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * This class is a wrapper around the OGM TransactionManager.
@@ -35,25 +41,25 @@ import org.springframework.transaction.support.*;
 public class Neo4jTransactionManager extends AbstractPlatformTransactionManager implements ResourceTransactionManager, InitializingBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Neo4jTransactionManager.class);
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactoryProvider;
 
-	public Neo4jTransactionManager(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public Neo4jTransactionManager(SessionFactoryProvider sessionFactoryProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
 	}
 
 
 	/**
 	 * Set the SessionFactory that this instance should manage transactions for.
 	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
 	}
 
 	/**
 	 * Return the EntityManagerFactory that this instance should manage transactions for.
 	 */
-	public SessionFactory getSessionFactory() {
-		return this.sessionFactory;
+	public SessionFactoryProvider getSessionFactoryProvider() {
+		return this.sessionFactoryProvider;
 	}
 
 	@Override
@@ -65,7 +71,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	@Override
 	protected Object doGetTransaction() {
 		Neo4jTransactionObject txObject = new Neo4jTransactionObject();
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactoryProvider());
 		if (sessionHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() +
@@ -99,7 +105,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 			// Bind the session holder to the thread.
 			if (txObject.isNewSessionHolder()) {
 				TransactionSynchronizationManager.bindResource(
-						getSessionFactory(), txObject.getSessionHolder());
+						getSessionFactoryProvider(), txObject.getSessionHolder());
 			}
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		} catch (TransactionException ex) {
@@ -113,8 +119,8 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 
 	private Session createSessionForTransaction() {
-		SessionFactory sessionFactory = getSessionFactory();
-		return sessionFactory.openSession();
+		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
+		return sessionFactoryProvider.openSession();
 	}
 
 
@@ -144,7 +150,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		Neo4jTransactionObject txObject = (Neo4jTransactionObject) transaction;
 		txObject.setSessionHolder(null, false);
 		SessionHolder sessionHolder = (SessionHolder)
-				TransactionSynchronizationManager.unbindResource(getSessionFactory());
+				TransactionSynchronizationManager.unbindResource(getSessionFactoryProvider());
 		return new SuspendedResourcesHolder(sessionHolder);
 	}
 
@@ -152,7 +158,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
-				getSessionFactory(), resourcesHolder.getSessionHolder());
+				getSessionFactoryProvider(), resourcesHolder.getSessionHolder());
 	}
 
 
@@ -174,6 +180,13 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 				throw new RuntimeException("Cannot commit transaction: " + tx + ", status: " + tx.status());
 			}
 			tx.commit();
+		} catch (RuntimeException re) {
+			DataAccessException dae = SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(re);
+			if (dae != null) {
+				throw dae;
+			} else {
+				throw new TransactionSystemException("Could not commit Neo4j transaction", re);
+			}
 		}
 	}
 
@@ -190,7 +203,13 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 				throw new RuntimeException("Cannot roll back transaction: " + tx + ", status: " + tx.status());
 			}
 			tx.rollback();
-
+		} catch (RuntimeException re) {
+			DataAccessException dae = SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(re);
+			if (dae != null) {
+				throw dae;
+			} else {
+				throw new TransactionSystemException("Could not commit Neo4j transaction", re);
+			}
 		} finally {
 			if (!txObject.isNewSessionHolder()) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.
@@ -219,7 +238,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		// (Could have been removed by EntityManagerFactoryUtils in order
 		// to replace it with an unsynchronized EntityManager).
 		if (txObject.isNewSessionHolder()) {
-			TransactionSynchronizationManager.unbindResourceIfPossible(getSessionFactory());
+			TransactionSynchronizationManager.unbindResourceIfPossible(getSessionFactoryProvider());
 		}
 		txObject.getSessionHolder().clear();
 
@@ -236,8 +255,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 				logger.debug("Closing Neo4j Session [" + em + "] after transaction");
 			}
 			em.clear();
-		}
-		else {
+		} else {
 			logger.debug("Not closing pre-bound JPA EntityManager after transaction");
 		}
 	}
@@ -266,12 +284,14 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
+		if (getSessionFactoryProvider() == null) {
+			throw new IllegalArgumentException("'sessionFactoryProvider' is required");
+		}
 	}
 
 	@Override
 	public Object getResourceFactory() {
-		return getSessionFactory();
+		return getSessionFactoryProvider();
 	}
 
 
@@ -323,6 +343,5 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		private SessionHolder getSessionHolder() {
 			return this.sessionHolder;
 		}
-
 	}
 }

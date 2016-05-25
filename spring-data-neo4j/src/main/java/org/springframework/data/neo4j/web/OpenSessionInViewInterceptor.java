@@ -1,13 +1,13 @@
-package org.springframework.data.neo4j.transaction.support;
+package org.springframework.data.neo4j.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.data.neo4j.transaction.SessionFactoryUtils;
+import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
 import org.springframework.data.neo4j.transaction.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
@@ -23,27 +23,27 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private SessionFactory sessionFactory;
+	private SessionFactoryProvider sessionFactoryProvider;
 
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
+		this.sessionFactoryProvider = sessionFactoryProvider;
 	}
 
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+	public SessionFactoryProvider getSessionFactoryProvider() {
+		return sessionFactoryProvider;
 	}
 
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getSessionFactory() == null) {
-			sessionFactory = beanFactory.getBean(SessionFactory.class);
+		if (getSessionFactoryProvider() == null) {
+			sessionFactoryProvider = beanFactory.getBean(SessionFactoryProvider.class);
 		}
 	}
 
 	@Override
 	public void preHandle(WebRequest webRequest) throws Exception {
-		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
+		if (TransactionSynchronizationManager.hasResource(getSessionFactoryProvider())) {
 			// Do not modify the Session: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) webRequest.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
@@ -51,9 +51,9 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 			webRequest.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		} else {
 			logger.debug("Opening Neo4j Session in OpenSessionInViewInterceptor");
-			Session session = SessionFactoryUtils.getSession(getSessionFactory(), true);
+			Session session = SessionFactoryProviderUtils.getSession(getSessionFactoryProvider(), true);
 			TransactionSynchronizationManager.bindResource(
-					getSessionFactory(), new SessionHolder(session));
+					getSessionFactoryProvider(), new SessionHolder(session));
 		}
 	}
 
@@ -75,14 +75,14 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 			}
 		} else {
 			SessionHolder pmHolder = (SessionHolder)
-					TransactionSynchronizationManager.unbindResource(getSessionFactory());
+					TransactionSynchronizationManager.unbindResource(getSessionFactoryProvider());
 			logger.debug("Closing Noe4j Session in OpenSessionInViewInterceptor");
-			SessionFactoryUtils.releaseSession(
-					pmHolder.getSession(), getSessionFactory());
+			SessionFactoryProviderUtils.releaseSession(
+					pmHolder.getSession(), getSessionFactoryProvider());
 		}
 	}
 
 	protected String getParticipateAttributeName() {
-		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
+		return getSessionFactoryProvider().toString() + PARTICIPATE_SUFFIX;
 	}
 }

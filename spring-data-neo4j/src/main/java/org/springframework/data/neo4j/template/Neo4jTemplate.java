@@ -21,19 +21,25 @@ import org.neo4j.ogm.cypher.query.SortOrder;
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.session.Utils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.neo4j.event.*;
+import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map;
 
 import static org.springframework.data.neo4j.util.IterableUtils.getSingle;
-import static org.springframework.data.neo4j.util.IterableUtils.getSingleOrNull;
 
 /**
  * Spring Data template for Neo4j, which is an implementation of {@link Neo4jOperations}.  Indeed, framework users are encouraged
@@ -51,20 +57,29 @@ import static org.springframework.data.neo4j.util.IterableUtils.getSingleOrNull;
  * @author Michal Bachman
  * @author Luanne Misquitta
  */
-public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisherAware {
+public class Neo4jTemplate implements Neo4jOperations, InitializingBean, ApplicationEventPublisherAware {
 
-    private final Session session;
+    private SessionFactoryProvider sessionFactoryProvider;
     private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new {@link Neo4jTemplate} based on the given Neo4j OGM {@link Session}.
      *
-     * @param session The Neo4j OGM session upon which to base the template
+     * @param sessionFactoryProvider The Neo4j OGM sessionFactoryProvider upon which to base the template
      */
     @Autowired
-    public Neo4jTemplate(Session session) {
-        Assert.notNull(session, "Cannot create a Neo4jTemplate without a Session!");
-        this.session = session;
+    public Neo4jTemplate(SessionFactoryProvider sessionFactoryProvider) {
+        Assert.notNull(sessionFactoryProvider, "Cannot create a Neo4jTemplate without a SessionFactoryProvider!");
+        this.sessionFactoryProvider = sessionFactoryProvider;
+    }
+
+    public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
+        this.sessionFactoryProvider = sessionFactoryProvider;
+    }
+
+
+    public SessionFactoryProvider getSessionFactoryProvider() {
+        return this.sessionFactoryProvider;
     }
 
     @Override
@@ -73,55 +88,137 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
     }
 
     @Override
-    public <T> T load(Class<T> type, Long id) {
-        return session.load(type, id);
+    public void afterPropertiesSet() {
+        if (getSessionFactoryProvider() == null) {
+            throw new IllegalArgumentException("Property 'sessionFactoryProvider' is required");
+        }
+    }
+
+    public <T> T execute(Neo4jCallback<T> action) throws DataAccessException {
+        Assert.notNull(action, "Callback object must not be null");
+        Session session = SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
+
+        try {
+            Session sessionToExpose = createSessionProxy(session);
+            return action.doInNeo4j(sessionToExpose);
+        } catch (RuntimeException ex) {
+            // Callback code threw application exception...
+            throw ex;
+        }
+    }
+
+
+    protected Session createSessionProxy(Session session) {
+        return (Session) Proxy.newProxyInstance(
+                session.getClass().getClassLoader(), new Class<?>[]{Session.class},
+                new CloseSuppressingInvocationHandler(session));
     }
 
     @Override
-    public <T> T load(Class<T> type, Long id, int depth) {
-        return session.load(type, id, depth);
-    }
-
-    public <T> Collection<T> loadAll(Class<T> type, Collection<Long> ids) {
-        return session.loadAll(type, ids);
-    }
-
-    public <T> Collection<T> loadAll(Class<T> type, Collection<Long> ids, int depth) {
-        return session.loadAll(type, ids, depth);
+    public <T> T load(final Class<T> type, final Long id) {
+        return execute(new Neo4jCallback<T>() {
+            @Override
+            public T doInNeo4j(Session session) throws RuntimeException {
+                return session.load(type, id);
+            }
+        });
     }
 
     @Override
-    public <T> Collection<T> loadAll(Class<T> type) {
-        return session.loadAll(type);
+    public <T> T load(final Class<T> type, final Long id, final int depth) {
+        return execute(new Neo4jCallback<T>() {
+            @Override
+            public T doInNeo4j(Session session) throws RuntimeException {
+                return session.load(type, id, depth);
+            }
+        });
+    }
+
+    public <T> Collection<T> loadAll(final Class<T> type, final Collection<Long> ids) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, ids);
+            }
+        });
+    }
+
+    public <T> Collection<T> loadAll(final Class<T> type, final Collection<Long> ids, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, ids, depth);
+            }
+        });
     }
 
     @Override
-    public <T> Collection<T> loadAll(Class<T> type, int depth) {
-        return session.loadAll(type, depth);
+    public <T> Collection<T> loadAll(final Class<T> type) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type);
+            }
+        });
     }
 
     @Override
-    public <T> Collection<T> loadAll(Class<T> type, SortOrder sortOrder, int depth) {
-        return session.loadAll(type, sortOrder, depth);
+    public <T> Collection<T> loadAll(final Class<T> type, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, depth);
+            }
+        });
     }
 
     @Override
-    public <T> Collection<T> loadAll(Class<T> type, SortOrder sortOrder, Pagination pagination, int depth) {
-        return session.loadAll(type, sortOrder, pagination, depth);
-    }
-
-    public <T> Collection<T> loadAll(Collection<T> objects) {
-        return session.loadAll(objects);
-    }
-
-    @Override
-    public <T> Collection<T> loadAll(Collection<T> objects, int depth) {
-        return session.loadAll(objects, depth);
+    public <T> Collection<T> loadAll(final Class<T> type, final SortOrder sortOrder, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, sortOrder, depth);
+            }
+        });
     }
 
     @Override
-    public <T> Collection<T> loadAll(Class<T> type, Collection<Long> ids, SortOrder sortOrder, int depth) {
-        return session.loadAll(type, ids, sortOrder, depth);
+    public <T> Collection<T> loadAll(final Class<T> type, final SortOrder sortOrder, final Pagination pagination, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, sortOrder, pagination, depth);
+            }
+        });
+    }
+
+    public <T> Collection<T> loadAll(final Collection<T> objects) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(objects);
+            }
+        });
+    }
+
+    @Override
+    public <T> Collection<T> loadAll(final Collection<T> objects, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(objects, depth);
+            }
+        });
+    }
+
+    @Override
+    public <T> Collection<T> loadAll(final Class<T> type, final Collection<Long> ids, final SortOrder sortOrder, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, ids, sortOrder, depth);
+            }
+        });
     }
 
     @Override
@@ -130,17 +227,18 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
     }
 
     @Override
-    public <T> T loadByProperty(Class<T> type, String propertyName, Object propertyValue, int depth) {
+    public <T> T loadByProperty(final Class<T> type, final String propertyName, final Object propertyValue, final int depth) {
         return getSingle(loadAllByProperty(type, propertyName, propertyValue, depth));
     }
 
-    public <T> T loadByPropertyOrNull(Class<T> type, String propertyName, Object propertyValue) {
-        return getSingleOrNull(loadAllByProperty(type, propertyName, propertyValue));
-    }
-
     @Override
-    public <T> Collection<T> loadAllByProperty(Class<T> type, String name, Object value) {
-        return session.loadAll(type, new Filter(name, value));
+    public <T> Collection<T> loadAllByProperty(final Class<T> type, final String name, final Object value) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, new Filter(name, value));
+            }
+        });
     }
 
     @Override
@@ -155,86 +253,155 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
 
     @Override
     public <T> Collection<T> loadAllByProperties(Class<T> type, Filters parameters) {
-       return loadAllByProperties(type, parameters, 1);
+        return loadAllByProperties(type, parameters, 1);
     }
 
     @Override
-    public <T> Collection<T> loadAllByProperties(Class<T> type, Filters parameters, int depth) {
-        return session.loadAll(type, parameters, depth);
+    public <T> Collection<T> loadAllByProperties(final Class<T> type, final Filters parameters, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, parameters, depth);
+            }
+        });
     }
 
-    public <T> Collection<T> loadAllByProperty(Class<T> type, String name, Object value, int depth) {
-        return session.loadAll(type, new Filter(name, value), depth);
+    public <T> Collection<T> loadAllByProperty(final Class<T> type, final String name, final Object value, final int depth) {
+        return execute(new Neo4jCallback<Collection<T>>() {
+            @Override
+            public Collection<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.loadAll(type, new Filter(name, value), depth);
+            }
+        });
     }
 
     @Override
-    public void delete(Object entity) {
-        publishEvent(new BeforeDeleteEvent(this, entity));
-        session.delete(entity);
-        publishEvent(new AfterDeleteEvent(this, entity));
+    public void delete(final Object entity) {
+        execute(new Neo4jCallback<Void>() {
+            @Override
+            public Void doInNeo4j(Session session) throws RuntimeException {
+                publishEvent(new BeforeDeleteEvent(this, entity));
+                session.delete(entity);
+                publishEvent(new AfterDeleteEvent(this, entity));
+                return null;
+            }
+        });
     }
 
     @Override
     public void clear() {
-        session.clear();
+        execute(new Neo4jCallback<Void>() {
+            @Override
+            public Void doInNeo4j(Session session) throws RuntimeException {
+                session.clear();
+                return null;
+            }
+        });
     }
 
-    public <T> void deleteAll(Class<T> type) {
-        session.deleteAll(type);
-    }
-
-    @Override
-    public QueryStatistics execute(String jsonStatements) {
-        return session.query(jsonStatements, Utils.map()).queryStatistics();
-    }
-
-    @Override
-    public QueryStatistics execute(String cypher, Map<String, Object> parameters) {
-        return session.query(cypher, parameters).queryStatistics();
-    }
-
-    public void purgeSession() {
-        session.clear();
-    }
-
-    @Override
-    public <T> T save(T entity) {
-        publishEvent(new BeforeSaveEvent(this, entity));
-        session.save(entity);
-        publishEvent(new AfterSaveEvent(this, entity));
-        return entity;
-    }
-
-    public <T> T save(T entity, int depth) {
-        publishEvent(new BeforeSaveEvent(this, entity));
-        session.save(entity, depth);
-        publishEvent(new AfterSaveEvent(this, entity));
-        return entity;
+    public <T> void deleteAll(final Class<T> type) {
+        execute(new Neo4jCallback<Object>() {
+            @Override
+            public Object doInNeo4j(Session session) throws RuntimeException {
+                session.deleteAll(type);
+                return null;
+            }
+        });
     }
 
     @Override
-    public Result query(String cypher, Map<String, ?> parameters) {
-        return session.query(cypher, parameters);
+    public QueryStatistics execute(final String jsonStatements) {
+        return execute(new Neo4jCallback<QueryStatistics>() {
+            @Override
+            public QueryStatistics doInNeo4j(Session session) throws RuntimeException {
+                return session.query(jsonStatements, Utils.map()).queryStatistics();
+            }
+        });
     }
 
     @Override
-    public <T> Iterable<T> queryForObjects(Class<T> objectType, String cypher, Map<String, ?> parameters) {
-        return session.query(objectType, cypher, parameters);
+    public QueryStatistics execute(final String cypher, final Map<String, Object> parameters) {
+        return execute(new Neo4jCallback<QueryStatistics>() {
+            @Override
+            public QueryStatistics doInNeo4j(Session session) throws RuntimeException {
+                return session.query(cypher, parameters).queryStatistics();
+            }
+        });
     }
 
     @Override
-    public Result query(String cypher, Map<String, ?> parameters, boolean readOnly) {
-        return session.query(cypher, parameters, readOnly);
+    public <T> T save(final T entity) {
+        return execute(new Neo4jCallback<T>() {
+            @Override
+            public T doInNeo4j(Session session) throws RuntimeException {
+                publishEvent(new BeforeSaveEvent(this, entity));
+                session.save(entity);
+                publishEvent(new AfterSaveEvent(this, entity));
+                return entity;
+            }
+        });
+    }
+
+    public <T> T save(final T entity, final int depth) {
+        return execute(new Neo4jCallback<T>() {
+            @Override
+            public T doInNeo4j(Session session) throws RuntimeException {
+                publishEvent(new BeforeSaveEvent(this, entity));
+                session.save(entity, depth);
+                publishEvent(new AfterSaveEvent(this, entity));
+                return entity;
+            }
+        });
     }
 
     @Override
-    public <T> T queryForObject(Class<T> objectType, String cypher, Map<String, ?> parameters) {
-        return session.queryForObject(objectType, cypher, parameters);
+    public Result query(final String cypher, final Map<String, ?> parameters) {
+        return execute(new Neo4jCallback<Result>() {
+            @Override
+            public Result doInNeo4j(Session session) throws RuntimeException {
+                return session.query(cypher, parameters);
+            }
+        });
     }
 
     @Override
-    public long count(Class<?> entityClass) {
-        return session.countEntitiesOfType(entityClass);
+    public <T> Iterable<T> queryForObjects(final Class<T> objectType, final String cypher, final Map<String, ?> parameters) {
+        return execute(new Neo4jCallback<Iterable<T>>() {
+            @Override
+            public Iterable<T> doInNeo4j(Session session) throws RuntimeException {
+                return session.query(objectType, cypher, parameters);
+            }
+        });
+    }
+
+    @Override
+    public Result query(final String cypher, final Map<String, ?> parameters, final boolean readOnly) {
+        return execute(new Neo4jCallback<Result>() {
+            @Override
+            public Result doInNeo4j(Session session) throws RuntimeException {
+                return session.query(cypher, parameters, readOnly);
+            }
+        });
+    }
+
+    @Override
+    public <T> T queryForObject(final Class<T> objectType, final String cypher, final Map<String, ?> parameters) {
+        return execute(new Neo4jCallback<T>() {
+            @Override
+            public T doInNeo4j(Session session) throws RuntimeException {
+                return session.queryForObject(objectType, cypher, parameters);
+            }
+        });
+    }
+
+    @Override
+    public long count(final Class<?> entityClass) {
+        return execute(new Neo4jCallback<Long>() {
+            @Override
+            public Long doInNeo4j(Session session) throws RuntimeException {
+                return session.countEntitiesOfType(entityClass);
+            }
+        });
     }
 
     private void publishEvent(Neo4jDataManipulationEvent event) {
@@ -243,4 +410,32 @@ public class Neo4jTemplate implements Neo4jOperations, ApplicationEventPublisher
         }
     }
 
+    private class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+        private final Session target;
+
+        public CloseSuppressingInvocationHandler(Session target) {
+            this.target = target;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            // Invocation on Session interface coming in...
+
+            if (method.getName().equals("equals")) {
+                // Only consider equal when proxies are identical.
+                return (proxy == args[0]);
+            } else if (method.getName().equals("hashCode")) {
+                // Use hashCode of Session proxy.
+                return System.identityHashCode(proxy);
+            }
+
+            // Invoke method on target Session.
+            try {
+                return method.invoke(this.target, args);
+            } catch (InvocationTargetException ex) {
+                throw ex.getTargetException();
+            }
+        }
+    }
 }

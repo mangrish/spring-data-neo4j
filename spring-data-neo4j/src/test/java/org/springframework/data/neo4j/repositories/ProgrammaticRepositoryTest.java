@@ -45,14 +45,14 @@ public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
     @Before
     public void init() {
         session = sessionFactory.openSession();
-        neo4jOperations = new Neo4jTemplate(session);
+        neo4jOperations = new Neo4jTemplate(sessionFactory);
         session.purgeDatabase();
     }
 
     @Test
     public void canInstantiateRepositoryProgrammatically() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new GraphRepositoryFactory(session);
 
         movieRepository = factory.getRepository(MovieRepository.class);
 
@@ -70,7 +70,7 @@ public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
     @Test
     public void shouldBeAbleToDeleteAllViaRepository() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new GraphRepositoryFactory(session);
 
         UserRepository userRepository = factory.getRepository(UserRepository.class);
 

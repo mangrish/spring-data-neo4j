@@ -36,7 +36,7 @@ public class Neo4jTemplateConfiguration extends Neo4jConfiguration {
 
     @Bean
     public Neo4jOperations template() throws Exception {
-        return new Neo4jTemplate(getSession());
+        return new Neo4jTemplate(getSessionFactory());
     }
 
 }

@@ -1,5 +1,4 @@
-package org.springframework.data.neo4j.transaction.support;
-
+package org.springframework.data.neo4j.web;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -7,8 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
-import org.springframework.data.neo4j.transaction.SessionFactoryUtils;
+import org.neo4j.ogm.session.SessionFactoryProvider;
+import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
 import org.springframework.data.neo4j.transaction.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,17 +19,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
-	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
+	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactoryProvider";
 
 	private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
 
 
-	public void setSessionFactoryBeanName(String sessionFactoryBeanName) {
+	public void setSessionFactoryProviderBeanName(String sessionFactoryBeanName) {
 		this.sessionFactoryBeanName = sessionFactoryBeanName;
 	}
 
 
-	protected String getSessionFactoryBeanName() {
+	protected String getSessionFactoryProviderBeanName() {
 		return this.sessionFactoryBeanName;
 	}
 
@@ -51,16 +50,16 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		SessionFactory sessionFactory = lookupSessionFactory(request);
+		SessionFactoryProvider sessionFactoryProvider = lookupSessionFactoryProvider(request);
 		boolean participate = false;
 
-		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
+		if (TransactionSynchronizationManager.hasResource(sessionFactoryProvider)) {
 			// Do not modify the Session: just set the participate flag.
 			participate = true;
 		} else {
 			logger.debug("Opening Neo4j Session in OpenSessionInViewFilter");
-			Session session = SessionFactoryUtils.getSession(sessionFactory, true);
-			TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+			Session session = SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
+			TransactionSynchronizationManager.bindResource(sessionFactoryProvider, new SessionHolder(session));
 		}
 
 		try {
@@ -68,25 +67,25 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		} finally {
 			if (!participate) {
 				SessionHolder pmHolder = (SessionHolder)
-						TransactionSynchronizationManager.unbindResource(sessionFactory);
+						TransactionSynchronizationManager.unbindResource(sessionFactoryProvider);
 				logger.debug("Closing Neo4j Session in OpenSessionInViewFilter");
-				SessionFactoryUtils.releaseSession(pmHolder.getSession(), sessionFactory);
+				SessionFactoryProviderUtils.releaseSession(pmHolder.getSession(), sessionFactoryProvider);
 			}
 		}
 	}
 
 
-	protected SessionFactory lookupSessionFactory(HttpServletRequest request) {
-		return lookupSessionFactory();
+	protected SessionFactoryProvider lookupSessionFactoryProvider(HttpServletRequest request) {
+		return lookupSessionFactoryProvider();
 	}
 
 
-	protected SessionFactory lookupSessionFactory() {
+	protected SessionFactoryProvider lookupSessionFactoryProvider() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Using SessionFactory '" + getSessionFactoryBeanName() +
+			logger.debug("Using SessionFactoryProvider '" + getSessionFactoryProviderBeanName() +
 					"' for OpenSessionInViewFilter");
 		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return wac.getBean(getSessionFactoryBeanName(), SessionFactory.class);
+		return wac.getBean(getSessionFactoryProviderBeanName(), SessionFactoryProvider.class);
 	}
 }
