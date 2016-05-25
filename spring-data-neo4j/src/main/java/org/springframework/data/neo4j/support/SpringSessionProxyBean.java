@@ -104,8 +104,6 @@ public class SpringSessionProxyBean implements FactoryBean<Session>, Initializin
 				return method.invoke(session, args);
 			} catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
-			} finally {
-				SessionFactoryProviderUtils.releaseSession(session, getSessionFactoryProvider());
 			}
 		}
 	}

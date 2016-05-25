@@ -74,11 +74,9 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 				webRequest.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			}
 		} else {
-			SessionHolder pmHolder = (SessionHolder)
-					TransactionSynchronizationManager.unbindResource(getSessionFactoryProvider());
+
+			TransactionSynchronizationManager.unbindResource(getSessionFactoryProvider());
 			logger.debug("Closing Noe4j Session in OpenSessionInViewInterceptor");
-			SessionFactoryProviderUtils.releaseSession(
-					pmHolder.getSession(), getSessionFactoryProvider());
 		}
 	}
 

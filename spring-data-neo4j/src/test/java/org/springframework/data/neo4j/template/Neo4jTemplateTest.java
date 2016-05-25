@@ -191,7 +191,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
         template.save(user.rate(bollywood, 1, "Bakwaas"));
         template.save(user.rate(hollywood, 4, "Pretty good"));
 
-        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, false).clear();
+        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true).clear();
 
         User u = template.loadByProperty(User.class, "name", "Harmanpreet Singh",0);
         assertEquals(0,u.getRatings().size());
@@ -239,7 +239,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
         template.save(user.rate(hollywood, 4, "Pretty good"));
         template.save(user2);
 
-        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, false).clear();
+        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true).clear();
 
         Filter nameFilter = new Filter("name","Harmanpreet Singh");
         Filter middleNameFilter = new Filter("middleName","A");

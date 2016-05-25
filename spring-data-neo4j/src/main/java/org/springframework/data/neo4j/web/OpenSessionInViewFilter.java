@@ -66,10 +66,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		} finally {
 			if (!participate) {
-				SessionHolder pmHolder = (SessionHolder)
-						TransactionSynchronizationManager.unbindResource(sessionFactoryProvider);
+
+				TransactionSynchronizationManager.unbindResource(sessionFactoryProvider);
 				logger.debug("Closing Neo4j Session in OpenSessionInViewFilter");
-				SessionFactoryProviderUtils.releaseSession(pmHolder.getSession(), sessionFactoryProvider);
 			}
 		}
 	}

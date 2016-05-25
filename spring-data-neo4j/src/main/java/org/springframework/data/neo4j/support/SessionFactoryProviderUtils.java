@@ -21,18 +21,13 @@ public class SessionFactoryProviderUtils {
 	private static final Log logger = LogFactory.getLog(SessionFactoryProviderUtils.class);
 
 
-	public static void releaseSession(Session session, SessionFactoryProvider sessionFactoryProvider) {
-		if (session == null) {
-			return;
-		}
-	}
-
 	public static Session getSession(SessionFactoryProvider sessionFactoryProvider, boolean allowCreate) throws IllegalStateException {
 
 		Assert.notNull(sessionFactoryProvider, "No SessionFactoryProvider specified");
 
 		SessionHolder sessionHolder =
 				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactoryProvider);
+
 		if (sessionHolder != null) {
 			if (!sessionHolder.isSynchronizedWithTransaction() &&
 					TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -53,7 +48,7 @@ public class SessionFactoryProviderUtils {
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for Neo4j Session");
-			// Use same PersistenceManager for further Neo4j actions within the transaction.
+			// Use same Session for further Neo4j actions within the transaction.
 			// Thread object will get removed by synchronization at transaction completion.
 			sessionHolder = new SessionHolder(session);
 			sessionHolder.setSynchronizedWithTransaction(true);
@@ -100,6 +95,24 @@ public class SessionFactoryProviderUtils {
 		return null;
 	}
 
+	public static boolean hasTransactionalSession(SessionFactoryProvider sessionFactoryProvider) {
+		if (sessionFactoryProvider == null) {
+			return false;
+		}
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactoryProvider);
+		return (sessionHolder != null && (sessionHolder.getSession() != null));
+	}
+
+	public static boolean isSessionTransactional(Session session, SessionFactoryProvider sessionFactoryProvider) {
+			if (sessionFactoryProvider == null) {
+				return false;
+			}
+			SessionHolder sessionHolder =
+					(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactoryProvider);
+			return (sessionHolder != null && (sessionHolder.getSession() == session));
+	}
+
 
 	private static class SessionSynchronization
 			extends ResourceHolderSynchronization<SessionHolder, SessionFactoryProvider>
@@ -134,9 +147,5 @@ public class SessionFactoryProviderUtils {
 			return false;
 		}
 
-		@Override
-		protected void releaseResource(SessionHolder resourceHolder, SessionFactoryProvider resourceKey) {
-			releaseSession(resourceHolder.getSession(), resourceKey);
-		}
 	}
 }
