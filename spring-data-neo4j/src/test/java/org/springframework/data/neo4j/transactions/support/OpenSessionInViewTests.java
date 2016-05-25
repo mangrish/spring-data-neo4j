@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.data.neo4j.web.OpenSessionInViewFilter;
 import org.springframework.data.neo4j.web.OpenSessionInViewInterceptor;
 import org.springframework.mock.web.*;
@@ -89,7 +90,7 @@ public class OpenSessionInViewTests {
 	@Test
 	public void testOpenPersistenceManagerInViewFilter() throws Exception {
 
-		final SessionFactory sessionFactory2 = mock(SessionFactory.class);
+		final SessionFactoryProvider sessionFactory2 = mock(SessionFactoryProvider.class);
 		Session session2 = mock(Session.class);
 
 		given(sessionFactory2.openSession()).willReturn(session2);
@@ -97,8 +98,8 @@ public class OpenSessionInViewTests {
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sessionFactory);
-		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sessionFactory2);
+		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactoryProvider", sessionFactory);
+		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactoryProvider", sessionFactory2);
 		wac.refresh();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -106,7 +107,7 @@ public class OpenSessionInViewTests {
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
-		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
+		filterConfig2.addInitParameter("sessionFactoryProviderBeanName", "mySessionFactoryProvider");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);

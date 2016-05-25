@@ -32,7 +32,7 @@ public class FriendContext extends Neo4jConfiguration {
 
     @Bean
     @Override
-    public SessionFactory getSessionFactory() {
+    public SessionFactory sessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.examples.friends.domain");
     }
 

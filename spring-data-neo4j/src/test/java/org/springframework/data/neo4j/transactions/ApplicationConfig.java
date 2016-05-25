@@ -42,7 +42,7 @@ public class ApplicationConfig {
 	}
 
 	@Bean
-	public SessionFactoryProvider sessionFactory() throws Exception {
+	public SessionFactoryProvider sessionFactoryProvider()  {
 		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.transactions");
 		lsfb.afterPropertiesSet();

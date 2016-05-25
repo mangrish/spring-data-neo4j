@@ -14,8 +14,8 @@
 package org.springframework.data.neo4j.config;
 
 
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,6 @@ import org.springframework.dao.support.PersistenceExceptionTranslationIntercepto
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
 import org.springframework.data.neo4j.support.Neo4jOgmExceptionTranslator;
-import org.springframework.data.neo4j.support.SharedSessionCreator;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
@@ -50,22 +49,16 @@ public abstract class Neo4jConfiguration {
     @Resource
     private Environment environment;
 
-    @Bean
-    public Session getSession() throws Exception {
-        logger.info("Initialising Neo4jSession");
-        SessionFactory sessionFactory = getSessionFactory();
-        Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
-        return SharedSessionCreator.createSharedSession(sessionFactory);
-    }
+
 
     @Bean
     public Neo4jOperations neo4jTemplate() throws Exception {
-        return new Neo4jTemplate(getSessionFactory());
+        return new Neo4jTemplate(sessionFactoryProvider());
     }
 
     @Bean
     public Neo4jMappingContext neo4jMappingContext() throws Exception {
-        return new Neo4jMappingContext(getSessionFactory().metaData());
+        return new Neo4jMappingContext(sessionFactoryProvider().metaData());
     }
 
     @Bean
@@ -89,9 +82,9 @@ public abstract class Neo4jConfiguration {
     @Bean
     public PlatformTransactionManager transactionManager() throws Exception {
         logger.info("Initialising Neo4jTransactionManager");
-        SessionFactory sessionFactory = getSessionFactory();
-        Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
-        return new Neo4jTransactionManager(sessionFactory);
+        SessionFactoryProvider sessionFactoryProvider = sessionFactoryProvider();
+        Assert.notNull(sessionFactoryProvider, "You must provide a SessionFactory instance in your Spring configuration classes");
+        return new Neo4jTransactionManager(sessionFactoryProvider);
     }
 
     @Bean
@@ -101,10 +94,6 @@ public abstract class Neo4jConfiguration {
     }
 
     @Bean
-    public abstract SessionFactory getSessionFactory();
+    public abstract SessionFactoryProvider sessionFactoryProvider();
 
-    @Bean
-    public SessionFactory sessionFactoryProvider() {
-        return getSessionFactory();
-    }
 }

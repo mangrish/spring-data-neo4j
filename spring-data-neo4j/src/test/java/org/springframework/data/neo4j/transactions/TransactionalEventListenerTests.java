@@ -362,7 +362,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 		}
 
 		@Override
-		public SessionFactory getSessionFactory() {
+		public SessionFactory sessionFactoryProvider() {
 			return new SessionFactory("org.springframework.data.neo4j.transactions.domain");
 		}
 	}

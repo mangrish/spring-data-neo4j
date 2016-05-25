@@ -30,13 +30,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class PersistenceContextInTheSamePackage extends Neo4jConfiguration {
 
     @Override
-    public SessionFactory getSessionFactory() {
+    public SessionFactory sessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
     }
 
-    @Override
-    @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
-    }
+
 }
