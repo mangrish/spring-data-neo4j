@@ -36,6 +36,4 @@ public class MoviesContext extends Neo4jConfiguration {
     public SessionFactory sessionFactoryProvider() {
         return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
     }
-
-
 }

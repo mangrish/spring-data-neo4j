@@ -14,10 +14,7 @@
 package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactoryProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
@@ -29,28 +26,24 @@ import org.springframework.data.repository.core.support.TransactionalRepositoryF
  */
 public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extends TransactionalRepositoryFactoryBeanSupport<S, T, Long> {
 
-    @Autowired
-    private SessionFactoryProvider sessionFactoryProvider;
+	private Session session;
 
-    private Session session;
+	public void setSession(Session session) {
+		this.session = session;
+	}
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
+	@Override
+	public void setMappingContext(MappingContext<?, ?> mappingContext) {
+		super.setMappingContext(mappingContext);
+	}
 
-    @Override
-    public void setMappingContext(MappingContext<?, ?> mappingContext) {
-        super.setMappingContext(mappingContext);
-    }
+	@Override
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+	}
 
-    @Override
-    public void afterPropertiesSet() {
-        setMappingContext(new Neo4jMappingContext(sessionFactoryProvider.metaData()));
-        super.afterPropertiesSet();
-    }
-
-    @Override
-    protected RepositoryFactorySupport doCreateRepositoryFactory() {
-        return new GraphRepositoryFactory(session);
-    }
+	@Override
+	protected RepositoryFactorySupport doCreateRepositoryFactory() {
+		return new GraphRepositoryFactory(session);
+	}
 }
