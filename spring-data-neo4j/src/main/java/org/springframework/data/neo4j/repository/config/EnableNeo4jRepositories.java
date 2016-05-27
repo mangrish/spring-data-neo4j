@@ -13,10 +13,10 @@
 
 package org.springframework.data.neo4j.repository.config;
 
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactoryBean;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -97,12 +97,12 @@ public @interface EnableNeo4jRepositories {
      Class<?> repositoryBaseClass() default DefaultRepositoryBaseClass.class;
 
     /**
-     * Configures the name of the {@link SessionFactoryProvider} bean definition to be used to create repositories
-     * discovered through this annotation. Defaults to {@code sessionFactoryProvider}.
+     * Configures the name of the {@link SessionFactory} bean definition to be used to create repositories
+     * discovered through this annotation. Defaults to {@code sessionFactory}.
      *
      * @return
      */
-    String sessionFactoryProviderRef() default "sessionFactoryProvider";
+    String sessionFactoryRef() default "sessionFactory";
 
     /**
      * Configures the name of the {@link PlatformTransactionManager} bean definition to be used to create repositories

@@ -13,45 +13,16 @@
 
 package org.springframework.data.neo4j.support;
 
-import org.neo4j.ogm.exception.InvalidDepthException;
-import org.neo4j.ogm.exception.NotFoundException;
-import org.neo4j.ogm.exception.ResultProcessingException;
-import org.neo4j.ogm.exception.TransactionException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.transaction.NoTransactionException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
  * @author Luanne Misquitta
  */
-public class Neo4jOgmExceptionTranslator {
+public class Neo4jOgmExceptionTranslator implements PersistenceExceptionTranslator {
 
-	public static DataAccessException translateExceptionIfPossible(Exception ex) {
-		try {
-			throw (RuntimeException) ex;
-		}
-
-		catch(NotFoundException nfe) {
-			throw new DataRetrievalFailureException(nfe.getMessage(), nfe);
-		}
-
-		catch(InvalidDepthException ide) {
-			throw new InvalidDataAccessApiUsageException(ide.getMessage(), ide);
-		}
-
-		catch(ResultProcessingException rpe) {
-			throw new DataRetrievalFailureException(rpe.getMessage(), rpe);
-		}
-
-		catch(TransactionException te) {
-			throw new NoTransactionException(te.getMessage(), te);
-		}
-
-		catch(RuntimeException e) {
-			throw e;
-		}
+	@Override
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		return SessionFactoryUtils.convertNeo4jAccessExceptionIfPossible(ex);
 	}
-
-
 }

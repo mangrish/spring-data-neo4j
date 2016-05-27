@@ -8,31 +8,35 @@ import java.lang.reflect.Proxy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.neo4j.ogm.session.SessionFactory;
-import org.neo4j.ogm.session.SessionFactoryProvider;
+import org.neo4j.ogm.config.Configuration;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.data.neo4j.session.Neo4jSessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 
 /**
  * Created by markangrish on 14/05/2016.
  */
-public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFactoryProvider>,
-		BeanClassLoaderAware, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator implements FactoryBean<SessionFactory>,
+		BeanClassLoaderAware, InitializingBean, DisposableBean {
 
-	protected final Log logger = LogFactory.getLog(LocalSessionFactoryProviderBean.class);
+	protected final Log logger = LogFactory.getLog(LocalSessionFactoryBean.class);
 
-	private SessionFactoryProvider sessionFactoryProvider;
+	private SessionFactory sessionFactory;
 
-	private SessionFactoryProvider nativeSessionFactoryProvider;
+	private SessionFactory nativeSessionFactory;
 
 	private String[] packagesToScan;
 
 	private ClassLoader beanClassLoader = getClass().getClassLoader();
 
+	private Configuration config;
+
+	public void setConfiguration(Configuration configuration) {
+		this.config = configuration;
+	}
 
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -43,13 +47,13 @@ public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFacto
 	}
 
 	@Override
-	public SessionFactoryProvider getObject() {
-		return sessionFactoryProvider;
+	public SessionFactory getObject() {
+		return sessionFactory;
 	}
 
 	@Override
-	public Class<? extends SessionFactoryProvider> getObjectType() {
-		return sessionFactoryProvider.getClass();
+	public Class<? extends SessionFactory> getObjectType() {
+		return sessionFactory.getClass();
 	}
 
 	@Override
@@ -60,16 +64,21 @@ public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFacto
 	@Override
 	public void afterPropertiesSet() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Building new Neo4j SessionFactoryProvider");
+			logger.info("Building new Neo4j SessionFactory");
 		}
-		this.nativeSessionFactoryProvider = new SessionFactory(packagesToScan);
 
-		// Wrap the SessionFactoryProvider in a factory implementing all its interfaces.
+		if (config == null) {
+			this.nativeSessionFactory = new Neo4jSessionFactory(packagesToScan);
+		} else {
+			this.nativeSessionFactory = new Neo4jSessionFactory(config, packagesToScan);
+		}
+
+		// Wrap the SessionFactory in a factory implementing all its interfaces.
 		// This allows interception of createSession methods to return an
 		// application-managed Session proxy that automatically joins
 		// existing transactions.
-		this.sessionFactoryProvider = (SessionFactoryProvider) Proxy.newProxyInstance(
-				this.beanClassLoader, new Class<?>[]{SessionFactoryProvider.class},
+		this.sessionFactory = (SessionFactory) Proxy.newProxyInstance(
+				this.beanClassLoader, new Class<?>[]{SessionFactory.class},
 				new ManagedSessionFactoryInvocationHandler(this));
 	}
 
@@ -81,13 +90,9 @@ public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFacto
 	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
 
 		// Standard delegation to the native factory, just post-processing EntityManager return values
-		return method.invoke(this.nativeSessionFactoryProvider, args);
+		return method.invoke(this.nativeSessionFactory, args);
 	}
 
-	@Override
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		return SessionFactoryProviderUtils.convertNeo4jAccessExceptionIfPossible(ex);
-	}
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -97,9 +102,9 @@ public class LocalSessionFactoryProviderBean implements FactoryBean<SessionFacto
 
 	private static class ManagedSessionFactoryInvocationHandler implements InvocationHandler, Serializable {
 
-		private final LocalSessionFactoryProviderBean sessionFactoryBean;
+		private final LocalSessionFactoryBean sessionFactoryBean;
 
-		public ManagedSessionFactoryInvocationHandler(LocalSessionFactoryProviderBean lsfpb) {
+		public ManagedSessionFactoryInvocationHandler(LocalSessionFactoryBean lsfpb) {
 			this.sessionFactoryBean = lsfpb;
 		}
 

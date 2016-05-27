@@ -37,6 +37,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.ogm.exception.MappingException;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
 import org.springframework.data.neo4j.examples.movies.domain.Rating;
 import org.springframework.data.neo4j.examples.movies.domain.TempMovie;
@@ -187,8 +188,8 @@ public class QueryIntegrationTest extends MultiDriverTestClass {
     /**
      * This limitation about not handling unmanaged types may be addressed after M2 if there's demand for it.
      */
-    @Test(expected = MappingException.class)
-    public void shouldThrowMappingExceptionIfQueryResultTypeIsNotManagedInMappingMetadata() {
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void shouldThrowInvalidDataAccessApiUsageExceptionIfQueryResultTypeIsNotManagedInMappingMetadata() {
         executeUpdate("CREATE (:User {name:'Colin'}), (:User {name:'Jeff'})");
 
         // NB: UnmanagedUserPojo is not scanned with the other domain classes

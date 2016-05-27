@@ -26,14 +26,13 @@ import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.cypher.Filters;
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
-import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.session.Utils;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.neo4j.examples.movies.domain.*;
-import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.SessionFactoryUtils;
 import org.springframework.data.neo4j.template.context.Neo4jTemplateConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -58,7 +57,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
     private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
 
     @Autowired private Neo4jOperations template;
-    @Autowired private SessionFactoryProvider sessionFactoryProvider;
+    @Autowired private SessionFactory sessionFactory;
 
     @Before
     public void setUpOgmSession() {
@@ -191,7 +190,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
         template.save(user.rate(bollywood, 1, "Bakwaas"));
         template.save(user.rate(hollywood, 4, "Pretty good"));
 
-        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true).clear();
+        SessionFactoryUtils.getSession(sessionFactory, true).clear();
 
         User u = template.loadByProperty(User.class, "name", "Harmanpreet Singh",0);
         assertEquals(0,u.getRatings().size());
@@ -239,7 +238,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
         template.save(user.rate(hollywood, 4, "Pretty good"));
         template.save(user2);
 
-        SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true).clear();
+        SessionFactoryUtils.getSession(sessionFactory, true).clear();
 
         Filter nameFilter = new Filter("name","Harmanpreet Singh");
         Filter middleNameFilter = new Filter("middleName","A");

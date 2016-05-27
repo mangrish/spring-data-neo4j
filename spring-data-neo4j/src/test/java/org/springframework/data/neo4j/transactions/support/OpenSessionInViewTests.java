@@ -15,8 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
-import org.neo4j.ogm.session.SessionFactoryProvider;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.web.OpenSessionInViewFilter;
 import org.springframework.data.neo4j.web.OpenSessionInViewInterceptor;
 import org.springframework.mock.web.*;
@@ -55,7 +54,7 @@ public class OpenSessionInViewTests {
 	public void testOpenPersistenceManagerInViewInterceptor() throws Exception {
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactoryProvider(sessionFactory);
+		interceptor.setSessionFactory(sessionFactory);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -90,7 +89,7 @@ public class OpenSessionInViewTests {
 	@Test
 	public void testOpenPersistenceManagerInViewFilter() throws Exception {
 
-		final SessionFactoryProvider sessionFactory2 = mock(SessionFactoryProvider.class);
+		final SessionFactory sessionFactory2 = mock(SessionFactory.class);
 		Session session2 = mock(Session.class);
 
 		given(sessionFactory2.openSession()).willReturn(session2);
@@ -98,8 +97,8 @@ public class OpenSessionInViewTests {
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactoryProvider", sessionFactory);
-		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactoryProvider", sessionFactory2);
+		wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory", sessionFactory);
+		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sessionFactory2);
 		wac.refresh();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -107,7 +106,7 @@ public class OpenSessionInViewTests {
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
-		filterConfig2.addInitParameter("sessionFactoryProviderBeanName", "mySessionFactoryProvider");
+		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);

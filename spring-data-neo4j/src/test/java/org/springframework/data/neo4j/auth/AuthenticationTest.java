@@ -216,7 +216,7 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory sessionFactoryProvider() {
+//            public SessionFactory sessionFactory() {
 //                return new SessionFactory(packages);
 //            }
 //        };
@@ -237,7 +237,7 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory sessionFactoryProvider() {
+//            public SessionFactory sessionFactory() {
 //                return new SessionFactory(packages);
 //            }
 //        };
@@ -256,7 +256,7 @@ public class AuthenticationTest
 //            }
 //
 //            @Override
-//            public SessionFactory sessionFactoryProvider() {
+//            public SessionFactory sessionFactory() {
 //                return new SessionFactory(packages);
 //            }
 //        };

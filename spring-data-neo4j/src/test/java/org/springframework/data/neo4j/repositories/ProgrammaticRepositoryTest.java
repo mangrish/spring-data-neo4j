@@ -16,13 +16,14 @@ package org.springframework.data.neo4j.repositories;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.data.neo4j.repositories.domain.Movie;
 import org.springframework.data.neo4j.repositories.domain.User;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
 import org.springframework.data.neo4j.repositories.repo.UserRepository;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
+import org.springframework.data.neo4j.session.Neo4jSessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.util.IterableUtils;
@@ -38,7 +39,7 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
 
     private MovieRepository movieRepository;
-    private SessionFactory sessionFactory = new SessionFactory("org.springframework.data.neo4j.repositories.domain");
+    private SessionFactory sessionFactory = new Neo4jSessionFactory("org.springframework.data.neo4j.repositories.domain");
     private Session session;
     private Neo4jOperations neo4jOperations;
 

@@ -3,9 +3,9 @@ package org.springframework.data.neo4j.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -19,19 +19,19 @@ public class SharedSessionBean
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private SessionFactoryProvider sessionFactoryProvider;
+	private SessionFactory sessionFactory;
 
 	private boolean synchronizedWithTransaction = true;
 
 	private Session shared;
 
 
-	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
-		this.sessionFactoryProvider = sessionFactoryProvider;
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
-	public SessionFactoryProvider getSessionFactoryProvider() {
-		return this.sessionFactoryProvider;
+	public SessionFactory getSessionFactory() {
+		return this.sessionFactory;
 	}
 
 
@@ -41,33 +41,33 @@ public class SharedSessionBean
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-//		if (getSessionFactoryProvider() == null) {
+//		if (getSessionFactory() == null) {
 //			if (!(beanFactory instanceof ListableBeanFactory)) {
 //				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
 //						"in a non-listable BeanFactory: " + beanFactory);
 //			}
 //			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
-//			setSessionFactoryProvider(SessionFactoryProviderUtils.findSessionFactoryProvider(lbf));
+//			setSessionFactory(SessionFactoryUtils.findSessionFactory(lbf));
 //		}
 	}
 
 
 	protected Session createSession() throws IllegalStateException {
-		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
-		Assert.state(sessionFactoryProvider != null, "No SessionFactoryProvider specified");
-		return sessionFactoryProvider.openSession();
+		SessionFactory sessionFactory = getSessionFactory();
+		Assert.state(sessionFactory != null, "No SessionFactory specified");
+		return sessionFactory.openSession();
 	}
 
 	/**
-	 * Obtain the transactional EntityManager for this accessor's EntityManagerFactory, if any.
+	 * Obtain the transactional EntityManager for this accessor's SessionFactory, if any.
 	 *
 	 * @return the transactional EntityManager, or {@code null} if none
-	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
+	 * @throws IllegalStateException if this accessor is not configured with an SessionFactory
 	 */
 	protected Session getTransactionalSession() throws IllegalStateException {
-		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
-		Assert.state(sessionFactoryProvider != null, "No SessionFactoryProvider specified");
-		return SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
+		SessionFactory sessionFactory = getSessionFactory();
+		Assert.state(sessionFactory != null, "No SessionFactory specified");
+		return SessionFactoryUtils.getSession(sessionFactory, true);
 	}
 
 
@@ -82,13 +82,13 @@ public class SharedSessionBean
 
 	@Override
 	public final void afterPropertiesSet() {
-		SessionFactoryProvider sessionFactoryProvider = getSessionFactoryProvider();
-		if (sessionFactoryProvider == null) {
-			throw new IllegalArgumentException("'sessionFactoryProvider' is required");
+		SessionFactory sessionFactory = getSessionFactory();
+		if (sessionFactory == null) {
+			throw new IllegalArgumentException("'sessionFactory' is required");
 		}
 
 		this.shared = SharedSessionCreator.createSharedSession(
-				sessionFactoryProvider, this.synchronizedWithTransaction);
+				sessionFactory, this.synchronizedWithTransaction);
 	}
 
 

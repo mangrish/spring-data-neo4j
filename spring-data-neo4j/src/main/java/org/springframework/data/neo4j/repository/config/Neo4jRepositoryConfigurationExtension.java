@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -26,6 +25,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactoryBean;
 import org.springframework.data.neo4j.repository.support.SessionBeanDefinitionRegistrarPostProcessor;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 import org.springframework.data.repository.config.RepositoryConfigurationSource;
@@ -128,7 +128,7 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
 
     /**
      * Creates an anonymous factory to extract the actual {@link Session} from the
-     * {@link SessionFactoryProvider} bean name reference.
+     * {@link SessionFactory} bean name reference.
      *
      * @param source
      * @return
@@ -139,7 +139,7 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
                 .rootBeanDefinition("org.springframework.data.neo4j.support.SharedSessionCreator");
         builder.setFactoryMethod("createSharedSession");
-        builder.addConstructorArgReference(getSessionFactoryProviderBeanRef(config));
+        builder.addConstructorArgReference(getSessionFactoryBeanRef(config));
 
         AbstractBeanDefinition bean = builder.getRawBeanDefinition();
         bean.setSource(source);
@@ -147,10 +147,10 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
         return bean;
     }
 
-    private static String getSessionFactoryProviderBeanRef(RepositoryConfigurationSource config) {
+    private static String getSessionFactoryBeanRef(RepositoryConfigurationSource config) {
 
-        String sessionFactoryProviderRef = config == null ? null : config.getAttribute("sessionFactoryProviderRef");
-        return sessionFactoryProviderRef == null ? "sessionFactoryProvider" : sessionFactoryProviderRef;
+        String sessionFactoryRef = config == null ? null : config.getAttribute("sessionFactoryRef");
+        return sessionFactoryRef == null ? "sessionFactory" : sessionFactoryRef;
     }
 
 }

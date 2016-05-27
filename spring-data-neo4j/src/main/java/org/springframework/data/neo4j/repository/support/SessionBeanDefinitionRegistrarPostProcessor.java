@@ -7,14 +7,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.*;
-import org.springframework.data.neo4j.support.LocalSessionFactoryProviderBean;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 
 /**
  * Created by markangrish on 19/05/2016.
@@ -26,29 +26,29 @@ public class SessionBeanDefinitionRegistrarPostProcessor  implements BeanFactory
 	static {
 
 		List<Class<?>> types = new ArrayList<Class<?>>();
-		types.add(SessionFactoryProvider.class);
-		types.add(LocalSessionFactoryProviderBean.class);
+		types.add(SessionFactory.class);
+		types.add(LocalSessionFactoryBean.class);
 
 		SFP_TYPES = Collections.unmodifiableList(types);
 	}
 
 
-	public static Collection<SessionFactoryProviderBeanDefinition> getSessionFactoryProviderBeanDefinitions(
+	public static Collection<SessionFactoryBeanDefinition> getSessionFactoryBeanDefinitions(
 			ConfigurableListableBeanFactory beanFactory) {
 
-		List<SessionFactoryProviderBeanDefinition> definitions = new ArrayList<>();
+		List<SessionFactoryBeanDefinition> definitions = new ArrayList<>();
 
 		for (Class<?> type : SFP_TYPES) {
 
 			for (String name : beanFactory.getBeanNamesForType(type, true, false)) {
-				definitions.add(new SessionFactoryProviderBeanDefinition(transformedBeanName(name), beanFactory));
+				definitions.add(new SessionFactoryBeanDefinition(transformedBeanName(name), beanFactory));
 			}
 		}
 
 		BeanFactory parentBeanFactory = beanFactory.getParentBeanFactory();
 
 		if (parentBeanFactory instanceof ConfigurableListableBeanFactory) {
-			definitions.addAll(getSessionFactoryProviderBeanDefinitions((ConfigurableListableBeanFactory) parentBeanFactory));
+			definitions.addAll(getSessionFactoryBeanDefinitions((ConfigurableListableBeanFactory) parentBeanFactory));
 		}
 
 		return definitions;
@@ -61,7 +61,7 @@ public class SessionBeanDefinitionRegistrarPostProcessor  implements BeanFactory
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
-		for (SessionFactoryProviderBeanDefinition definition : getSessionFactoryProviderBeanDefinitions(beanFactory)) {
+		for (SessionFactoryBeanDefinition definition : getSessionFactoryBeanDefinitions(beanFactory)) {
 
 			if (!(definition.getBeanFactory() instanceof BeanDefinitionRegistry)) {
 				continue;

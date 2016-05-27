@@ -13,12 +13,11 @@
 
 package org.springframework.data.neo4j.repositories.repo;
 
-import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.Neo4jSessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -30,8 +29,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class PersistenceContextInTheSamePackage extends Neo4jConfiguration {
 
     @Override
-    public SessionFactory sessionFactoryProvider() {
-        return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
+    public SessionFactory sessionFactory() {
+        return new Neo4jSessionFactory("org.springframework.data.neo4j.repositories.domain");
     }
 
 

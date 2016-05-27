@@ -30,14 +30,14 @@ import org.neo4j.ogm.cypher.query.SortOrder;
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.neo4j.ogm.session.Utils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.neo4j.event.*;
-import org.springframework.data.neo4j.support.SessionFactoryProviderUtils;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.SessionFactoryUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -58,26 +58,27 @@ import org.springframework.util.Assert;
  */
 public class Neo4jTemplate implements Neo4jOperations, InitializingBean, ApplicationEventPublisherAware {
 
-	private SessionFactoryProvider sessionFactoryProvider;
+	private SessionFactory sessionFactory;
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * Constructs a new {@link Neo4jTemplate} based on the given Neo4j OGM {@link Session}.
 	 *
-	 * @param sessionFactoryProvider The Neo4j OGM sessionFactoryProvider upon which to base the template
+	 * @param sessionFactory The Neo4j OGM sessionFactory upon which to base the template
 	 */
-	public Neo4jTemplate(SessionFactoryProvider sessionFactoryProvider) {
-		Assert.notNull(sessionFactoryProvider, "Cannot create a Neo4jTemplate without a SessionFactoryProvider!");
-		this.sessionFactoryProvider = sessionFactoryProvider;
+	public Neo4jTemplate(SessionFactory sessionFactory) {
+		Assert.notNull(sessionFactory, "Cannot create a Neo4jTemplate without a SessionFactory!");
+		setSessionFactory(sessionFactory);
+		afterPropertiesSet();
 	}
 
-	public void setSessionFactoryProvider(SessionFactoryProvider sessionFactoryProvider) {
-		this.sessionFactoryProvider = sessionFactoryProvider;
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 
-	public SessionFactoryProvider getSessionFactoryProvider() {
-		return this.sessionFactoryProvider;
+	public SessionFactory getSessionFactory() {
+		return this.sessionFactory;
 	}
 
 	@Override
@@ -87,14 +88,14 @@ public class Neo4jTemplate implements Neo4jOperations, InitializingBean, Applica
 
 	@Override
 	public void afterPropertiesSet() {
-		if (getSessionFactoryProvider() == null) {
-			throw new IllegalArgumentException("Property 'sessionFactoryProvider' is required");
+		if (getSessionFactory() == null) {
+			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 	}
 
 	public <T> T execute(Neo4jCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-		Session session = SessionFactoryProviderUtils.getSession(sessionFactoryProvider, true);
+		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
 
 		try {
 			Session sessionToExpose = createSessionProxy(session);

@@ -27,7 +27,7 @@ public class SessionHolder extends ResourceHolderSupport {
 		this.transactionActive = transactionActive;
 	}
 
-	public boolean isTransactionActive() {
+	protected boolean isTransactionActive() {
 		return this.transactionActive;
 	}
 

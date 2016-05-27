@@ -15,8 +15,8 @@ package org.springframework.data.neo4j.transactions.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BusinessService {
 
     @Autowired
-    private SessionFactoryProvider sessionFactoryProvider;
+    private SessionFactory sessionFactory;
 
     @Transactional
     public void successMethodInTransaction() {
@@ -48,15 +48,15 @@ public class BusinessService {
     }
 
     public void insert() {
-        new Neo4jTemplate(sessionFactoryProvider).execute("CREATE (node {name: 'n'})");
+        new Neo4jTemplate(sessionFactory).execute("CREATE (node {name: 'n'})");
     }
 
     public Iterable<Map<String, Object>> fetch() {
-        return new Neo4jTemplate(sessionFactoryProvider).query("MATCH (n) RETURN n.name", new HashMap<String, Object>());
+        return new Neo4jTemplate(sessionFactory).query("MATCH (n) RETURN n.name", new HashMap<String, Object>());
     }
 
     public void purge() {
-        new Neo4jTemplate(sessionFactoryProvider).execute("MATCH (n) DELETE n");
+        new Neo4jTemplate(sessionFactory).execute("MATCH (n) DELETE n");
 
     }
 

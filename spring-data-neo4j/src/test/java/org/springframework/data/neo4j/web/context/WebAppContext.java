@@ -15,13 +15,13 @@ package org.springframework.data.neo4j.web.context;
 
 import javax.annotation.Resource;
 
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.support.LocalSessionFactoryProviderBean;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.web.OpenSessionInViewInterceptor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,7 +47,7 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
 	public void addInterceptors(InterceptorRegistry registry) {
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		try {
-			interceptor.setSessionFactoryProvider(sessionFactoryProvider());
+			interceptor.setSessionFactory(sessionFactory());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -56,12 +56,12 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
 
 	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {
-		return new Neo4jTransactionManager(sessionFactoryProvider());
+		return new Neo4jTransactionManager(sessionFactory());
 	}
 
 	@Bean
-	public SessionFactoryProvider sessionFactoryProvider() throws Exception {
-		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+	public SessionFactory sessionFactory() throws Exception {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.web.domain");
 		lsfb.afterPropertiesSet();
 		return lsfb.getObject();

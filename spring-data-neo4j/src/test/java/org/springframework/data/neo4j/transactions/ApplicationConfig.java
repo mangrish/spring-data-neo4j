@@ -13,13 +13,13 @@
 
 package org.springframework.data.neo4j.transactions;
 
-import org.neo4j.ogm.session.SessionFactoryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.support.LocalSessionFactoryProviderBean;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -37,13 +37,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class ApplicationConfig {
 
 	@Bean
-	public PlatformTransactionManager transactionManager(SessionFactoryProvider sessionFactoryProvider) throws Exception {
-		return new Neo4jTransactionManager(sessionFactoryProvider);
+	public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) throws Exception {
+		return new Neo4jTransactionManager(sessionFactory);
 	}
 
 	@Bean
-	public SessionFactoryProvider sessionFactoryProvider()  {
-		LocalSessionFactoryProviderBean lsfb = new LocalSessionFactoryProviderBean();
+	public SessionFactory sessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.transactions");
 		lsfb.afterPropertiesSet();
 		return lsfb.getObject();

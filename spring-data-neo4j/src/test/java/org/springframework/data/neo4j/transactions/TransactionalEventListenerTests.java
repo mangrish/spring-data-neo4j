@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -23,6 +22,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
+import org.springframework.data.neo4j.session.Neo4jSessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
@@ -362,8 +363,8 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 		}
 
 		@Override
-		public SessionFactory sessionFactoryProvider() {
-			return new SessionFactory("org.springframework.data.neo4j.transactions.domain");
+		public SessionFactory sessionFactory() {
+			return new Neo4jSessionFactory("org.springframework.data.neo4j.transactions.domain");
 		}
 	}
 

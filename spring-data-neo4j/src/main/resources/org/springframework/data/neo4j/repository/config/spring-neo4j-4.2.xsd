@@ -17,7 +17,7 @@
             <xsd:complexContent>
                 <xsd:extension base="repository:repositories">
                     <xsd:attributeGroup ref="repository:transactional-repository-attributes" />
-                    <xsd:attribute name="session-factory-provider-ref" type="sessionFactoryProviderRef" />
+                    <xsd:attribute name="session-factory-provider-ref" type="sessionFactoryRef" />
                     <xsd:attribute name="enable-default-transactions" type="xsd:boolean">
                         <xsd:annotation>
                             <xsd:documentation><![CDATA[
@@ -31,11 +31,11 @@
     </xsd:element>
 
 
-    <xsd:simpleType name="sessionFactoryProviderRef">
+    <xsd:simpleType name="sessionFactoryRef">
         <xsd:annotation>
             <xsd:appinfo>
                 <tool:annotation kind="ref">
-                    <tool:assignable-to type="org.springframework.data.neo4j.support.LocalSessionFactoryProviderBean" />
+                    <tool:assignable-to type="org.springframework.data.neo4j.support.LocalSessionFactoryBean" />
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>

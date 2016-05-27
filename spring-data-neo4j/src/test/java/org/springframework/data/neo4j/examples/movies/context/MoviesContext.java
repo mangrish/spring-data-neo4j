@@ -13,13 +13,13 @@
 
 package org.springframework.data.neo4j.examples.movies.context;
 
-import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.Neo4jSessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -33,7 +33,7 @@ public class MoviesContext extends Neo4jConfiguration {
 
     @Override
     @Bean
-    public SessionFactory sessionFactoryProvider() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+    public SessionFactory sessionFactory() {
+        return new Neo4jSessionFactory("org.springframework.data.neo4j.examples.movies.domain");
     }
 }
