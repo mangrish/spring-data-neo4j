@@ -37,7 +37,6 @@ import org.springframework.util.StringUtils;
  */
 public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurationExtensionSupport {
 
-    public static final String NEO4J_MAPPING_CONTEXT_BEAN_NAME = "neo4jMappingContext";
     private static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
     private static final String ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE = "enableDefaultTransactions";
 
@@ -71,7 +70,6 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
         builder.addPropertyValue("transactionManager",
                 transactionManagerRef == null ? DEFAULT_TRANSACTION_MANAGER_BEAN_NAME : transactionManagerRef);
         builder.addPropertyValue("session", getSessionBeanDefinitionFor(source, source.getSource()));
-        builder.addPropertyReference("mappingContext", NEO4J_MAPPING_CONTEXT_BEAN_NAME);
     }
 
     /*
@@ -114,16 +112,6 @@ public class Neo4jRepositoryConfigurationExtension extends RepositoryConfigurati
 
         registerIfNotAlreadyRegistered(new RootBeanDefinition(SessionBeanDefinitionRegistrarPostProcessor.class),
                 registry, "sBeanDefinitionRegistrarPostProcessor", source);
-
-        registerIfNotAlreadyRegistered(new RootBeanDefinition(Neo4jMappingContextFactoryBean.class), registry,
-                NEO4J_MAPPING_CONTEXT_BEAN_NAME, source);
-
-        // Register bean definition for DefaultJpaContext
-//
-//		RootBeanDefinition contextDefinition = new RootBeanDefinition(DefaultJpaContext.class);
-//		contextDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-//
-//		registerIfNotAlreadyRegistered(contextDefinition, registry, JPA_CONTEXT_BEAN_NAME, source);
     }
 
     /**

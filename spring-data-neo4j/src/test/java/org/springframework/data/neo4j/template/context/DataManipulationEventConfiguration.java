@@ -23,8 +23,14 @@ import org.springframework.data.neo4j.event.BeforeDeleteEvent;
 import org.springframework.data.neo4j.event.BeforeSaveEvent;
 import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.template.TestNeo4jEventListener;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.Assert;
 
 /**
  * Spring Configuration bean for testing data manipulation events supported by <code>Neo4jTemplate</code>.
@@ -34,11 +40,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-public class DataManipulationEventConfiguration extends Neo4jConfiguration {
+public class DataManipulationEventConfiguration  {
 
-    @Override
+    @Bean
+    public PlatformTransactionManager transactionManager() throws Exception {
+        SessionFactory sessionFactory = sessionFactory();
+        Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+        return new Neo4jTransactionManager(sessionFactory);
+    }
+
+    @Bean
+    public Neo4jOperations neo4jTemplate() throws Exception {
+        return new Neo4jTemplate(sessionFactory());
+    }
+
+    @Bean
     public SessionFactory sessionFactory() {
-        return new Neo4jSessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+        lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+        lsfb.afterPropertiesSet();
+        return lsfb.getObject();
     }
 
     @Bean

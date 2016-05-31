@@ -89,7 +89,7 @@ public abstract class SharedSessionCreator {
 				} catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
-			} else if (method.getName().equals("openTransaction")) {
+			} else if (method.getName().equals("beginTransaction")) {
 				throw new IllegalStateException(
 						"Not allowed to create transaction on shared EntityManager - " +
 								"use Spring transactions or EJB CMT instead");

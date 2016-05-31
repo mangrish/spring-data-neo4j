@@ -35,6 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.event.*;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.SessionFactoryUtils;
@@ -57,6 +58,7 @@ import org.springframework.util.Assert;
  * @author Luanne Misquitta
  */
 public class Neo4jTemplate implements Neo4jOperations, InitializingBean, ApplicationEventPublisherAware {
+
 
 	private SessionFactory sessionFactory;
 	private ApplicationEventPublisher applicationEventPublisher;
@@ -102,10 +104,9 @@ public class Neo4jTemplate implements Neo4jOperations, InitializingBean, Applica
 			return action.doInNeo4j(sessionToExpose);
 		} catch (RuntimeException ex) {
 			// Callback code threw application exception...
-			throw ex;
+			throw SessionFactoryUtils.convertNeo4jAccessExceptionIfPossible(ex);
 		}
 	}
-
 
 	protected Session createSessionProxy(Session session) {
 		return (Session) Proxy.newProxyInstance(

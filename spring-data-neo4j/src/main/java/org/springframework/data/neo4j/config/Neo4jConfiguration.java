@@ -22,7 +22,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.data.neo4j.mapping.Neo4jMappingContext;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.Neo4jOgmExceptionTranslator;
 import org.springframework.data.neo4j.template.Neo4jOperations;
@@ -43,14 +42,6 @@ import javax.annotation.Resource;
 public abstract class Neo4jConfiguration {
 
     private final Logger logger = LoggerFactory.getLogger(Neo4jConfiguration.class);
-
-    @Resource
-    private Environment environment;
-
-    @Bean
-    public Neo4jOperations neo4jTemplate() throws Exception {
-        return new Neo4jTemplate(sessionFactory());
-    }
 
     @Bean
     public PersistenceExceptionTranslator persistenceExceptionTranslator() {

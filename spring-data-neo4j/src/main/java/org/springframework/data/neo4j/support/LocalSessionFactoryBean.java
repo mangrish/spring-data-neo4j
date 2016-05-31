@@ -38,8 +38,19 @@ public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator impleme
 		this.config = configuration;
 	}
 
+	public final Configuration getConfiguration() {
+		if (this.config == null) {
+			throw new IllegalStateException("Configuration not initialized yet");
+		}
+		return this.config;
+	}
+
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	public String[] getPackagesToScan() {
+		return packagesToScan;
 	}
 
 	@Override
