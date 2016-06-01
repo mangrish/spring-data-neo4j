@@ -16,7 +16,6 @@ package org.springframework.data.neo4j.examples.friends.context;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
@@ -34,7 +33,7 @@ import org.springframework.util.Assert;
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.friends.repo")
 @ComponentScan({"org.springframework.data.neo4j.examples.friends"})
 @EnableTransactionManagement
-public class FriendContext  {
+public class FriendContext {
 
 	@Bean
 	public PlatformTransactionManager transactionManager() throws Exception {

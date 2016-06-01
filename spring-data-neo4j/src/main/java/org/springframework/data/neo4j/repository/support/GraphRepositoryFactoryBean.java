@@ -15,9 +15,11 @@ package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
+import org.springframework.util.Assert;
 
 
 /**
@@ -28,6 +30,7 @@ public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extend
 
 	private Session session;
 
+	@PersistenceContext
 	public void setSession(Session session) {
 		this.session = session;
 	}
@@ -39,6 +42,7 @@ public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extend
 
 	@Override
 	public void afterPropertiesSet() {
+		Assert.notNull(session, "Session must not be null!");
 		super.afterPropertiesSet();
 	}
 

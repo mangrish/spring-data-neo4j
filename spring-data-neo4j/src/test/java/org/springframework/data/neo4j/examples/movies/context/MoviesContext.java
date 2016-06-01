@@ -16,11 +16,13 @@ package org.springframework.data.neo4j.examples.movies.context;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.Assert;
 
 /**
  * @author Michal Bachman
@@ -29,11 +31,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan({"org.springframework.data.neo4j.examples.movies"})
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.movies.repo")
 @EnableTransactionManagement
-public class MoviesContext extends Neo4jConfiguration {
+public class MoviesContext {
 
-    @Override
-    @Bean
-    public SessionFactory sessionFactory() {
-        return new Neo4jSessionFactory("org.springframework.data.neo4j.examples.movies.domain");
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager() throws Exception {
+		SessionFactory sessionFactory = sessionFactory();
+		Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+		return new Neo4jTransactionManager(sessionFactory);
+	}
+
+	@Bean
+	public SessionFactory sessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 }

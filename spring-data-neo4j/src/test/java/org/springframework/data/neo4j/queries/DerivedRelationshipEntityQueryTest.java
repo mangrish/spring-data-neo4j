@@ -20,6 +20,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
 import org.springframework.data.neo4j.examples.movies.domain.Rating;
 import org.springframework.data.neo4j.examples.movies.domain.TempMovie;
@@ -47,7 +48,7 @@ public class DerivedRelationshipEntityQueryTest extends MultiDriverTestClass {
 
 	private static GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
 
-	@Autowired
+	@PersistenceContext
 	private Session session;
 
 	@Autowired

@@ -5,22 +5,24 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.ogm.config.Configuration;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.neo4j.ogm.session.Session;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.*;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
 
 /**
  * Created by markangrish on 14/05/2016.
  */
-public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator implements FactoryBean<SessionFactory>,
-		BeanClassLoaderAware, InitializingBean, DisposableBean {
+public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
+		BeanClassLoaderAware, PersistenceExceptionTranslator, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(LocalSessionFactoryBean.class);
 
@@ -73,6 +75,11 @@ public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator impleme
 	}
 
 	@Override
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		return SessionFactoryUtils.convertNeo4jAccessExceptionIfPossible(ex);
+	}
+
+	@Override
 	public void afterPropertiesSet() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Building new Neo4j SessionFactory");
@@ -100,8 +107,22 @@ public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator impleme
 	 */
 	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
 
+		 if (method.getName().equals("openSession")) {
+			// JPA 2.1's createEntityManager(SynchronizationType, Map)
+			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
+			Session rawEntityManager = getNativeSessionFactory().openSession();
+			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
+		}
+
 		// Standard delegation to the native factory, just post-processing EntityManager return values
-		return method.invoke(this.nativeSessionFactory, args);
+		Object retVal =  method.invoke(this.nativeSessionFactory, args);
+
+		if (retVal instanceof Session) {
+			// Any other createEntityManager variant - expecting non-synchronized semantics
+			Session rawEntityManager = (Session) retVal;
+			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
+		}
+		return retVal;
 	}
 
 
@@ -109,6 +130,12 @@ public class LocalSessionFactoryBean extends Neo4jOgmExceptionTranslator impleme
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
+
+
+	public SessionFactory getNativeSessionFactory() {
+		return this.nativeSessionFactory;
+	}
+
 
 
 	private static class ManagedSessionFactoryInvocationHandler implements InvocationHandler, Serializable {

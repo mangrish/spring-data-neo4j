@@ -14,14 +14,15 @@ package org.springframework.data.neo4j.extensions;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.Assert;
 
 /**
- *
  * Note how the repository base class for all our repositories is overridden
  * using the 'repositoryBaseClass' attribute.
  * This annotation change allows all our repositories to easily extend one or more
@@ -32,12 +33,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableNeo4jRepositories(repositoryBaseClass = CustomGraphRepositoryImpl.class)
 @EnableTransactionManagement
-public class CustomPersistenceContext extends Neo4jConfiguration {
+public class CustomPersistenceContext {
 
-    @Override
-    @Bean
-    public SessionFactory sessionFactory() {
-        return new Neo4jSessionFactory("org.springframework.data.neo4j.extensions.domain");
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager() throws Exception {
+		SessionFactory sessionFactory = sessionFactory();
+		Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+		return new Neo4jTransactionManager(sessionFactory);
+	}
 
+	@Bean
+	public SessionFactory sessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.extensions.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 }

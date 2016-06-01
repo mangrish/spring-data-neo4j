@@ -21,11 +21,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
-import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.transaction.support.*;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -345,7 +346,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class BasicConfiguration extends Neo4jConfiguration {
+	static class BasicConfiguration {
 
 		@Bean // set automatically with tx management
 		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
@@ -362,9 +363,19 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 			return new CallCountingTransactionManager(sessionFactory);
 		}
 
-		@Override
+		@Bean
+		public PlatformTransactionManager transactionManager() throws Exception {
+			SessionFactory sessionFactory = sessionFactory();
+			Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+			return new Neo4jTransactionManager(sessionFactory);
+		}
+
+		@Bean
 		public SessionFactory sessionFactory() {
-			return new Neo4jSessionFactory("org.springframework.data.neo4j.transactions.domain");
+			LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+			lsfb.setPackagesToScan("org.springframework.data.neo4j.transactions.domain");
+			lsfb.afterPropertiesSet();
+			return lsfb.getObject();
 		}
 	}
 

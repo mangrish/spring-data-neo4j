@@ -41,18 +41,11 @@ public class SharedSessionBean
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-//		if (getSessionFactory() == null) {
-//			if (!(beanFactory instanceof ListableBeanFactory)) {
-//				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
-//						"in a non-listable BeanFactory: " + beanFactory);
-//			}
-//			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
-//			setSessionFactory(SessionFactoryUtils.findSessionFactory(lbf));
-//		}
+		setSessionFactory(beanFactory.getBean(SessionFactory.class));
 	}
 
 
-	protected Session createSession() throws IllegalStateException {
+	protected Session openSession() throws IllegalStateException {
 		SessionFactory sessionFactory = getSessionFactory();
 		Assert.state(sessionFactory != null, "No SessionFactory specified");
 		return sessionFactory.openSession();
@@ -67,7 +60,7 @@ public class SharedSessionBean
 	protected Session getTransactionalSession() throws IllegalStateException {
 		SessionFactory sessionFactory = getSessionFactory();
 		Assert.state(sessionFactory != null, "No SessionFactory specified");
-		return SessionFactoryUtils.getSession(sessionFactory, true);
+		return SessionFactoryUtils.getTransactionalSession(sessionFactory, true);
 	}
 
 

@@ -11,6 +11,7 @@ import org.springframework.data.neo4j.support.SessionFactoryUtils;
 import org.springframework.data.neo4j.transaction.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 
@@ -36,9 +37,13 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getSessionFactory() == null) {
-			sessionFactory = beanFactory.getBean(SessionFactory.class);
-		}
+		setSessionFactory(beanFactory.getBean(SessionFactory.class));
+	}
+
+	protected Session openSession() throws IllegalStateException {
+		SessionFactory sessionFactory = getSessionFactory();
+		Assert.state(sessionFactory != null, "No SessionFactory specified");
+		return sessionFactory.openSession();
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 			webRequest.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		} else {
 			logger.debug("Opening Neo4j Session in OpenSessionInViewInterceptor");
-			Session session = SessionFactoryUtils.getSession(getSessionFactory(), true);
+			Session session = openSession();
 			TransactionSynchronizationManager.bindResource(
 					getSessionFactory(), new SessionHolder(session));
 		}
@@ -64,23 +69,30 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor, Bean
 
 	@Override
 	public void afterCompletion(WebRequest webRequest, Exception e) throws Exception {
-		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) webRequest.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-		if (count != null) {
-			// Do not modify the Session: just clear the marker.
-			if (count > 1) {
-				webRequest.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
-			} else {
-				webRequest.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-			}
-		} else {
-
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		if (!decrementParticipateCount(webRequest)) {
+			SessionHolder emHolder = (SessionHolder)
+					TransactionSynchronizationManager.unbindResource(getSessionFactory());
 			logger.debug("Closing Noe4j Session in OpenSessionInViewInterceptor");
+			SessionFactoryUtils.closeSession(emHolder.getSession());
 		}
 	}
 
-	protected String getParticipateAttributeName() {
+	private boolean decrementParticipateCount(WebRequest request) {
+		String participateAttributeName = getParticipateAttributeName();
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		if (count == null) {
+			return false;
+		}
+		// Do not modify the Session: just clear the marker.
+		if (count > 1) {
+			request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
+		} else {
+			request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		}
+		return true;
+	}
+
+	private String getParticipateAttributeName() {
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 }

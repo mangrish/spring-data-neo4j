@@ -35,7 +35,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.neo4j.event.*;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.SessionFactoryUtils;
@@ -59,28 +58,27 @@ import org.springframework.util.Assert;
  */
 public class Neo4jTemplate implements Neo4jOperations, InitializingBean, ApplicationEventPublisherAware {
 
-
-	private SessionFactory sessionFactory;
+	private Session session;
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * Constructs a new {@link Neo4jTemplate} based on the given Neo4j OGM {@link Session}.
 	 *
-	 * @param sessionFactory The Neo4j OGM sessionFactory upon which to base the template
+	 * @param session The Neo4j OGM sessionFactory upon which to base the template
 	 */
-	public Neo4jTemplate(SessionFactory sessionFactory) {
-		Assert.notNull(sessionFactory, "Cannot create a Neo4jTemplate without a SessionFactory!");
-		setSessionFactory(sessionFactory);
+	public Neo4jTemplate(Session session) {
+		Assert.notNull(session, "Cannot create a Neo4jTemplate without a Session!");
+		setSession(session);
 		afterPropertiesSet();
 	}
 
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public void setSession(Session session) {
+		this.session = session;
 	}
 
 
-	public SessionFactory getSessionFactory() {
-		return this.sessionFactory;
+	public Session getSession() {
+		return this.session;
 	}
 
 	@Override
@@ -90,14 +88,14 @@ public class Neo4jTemplate implements Neo4jOperations, InitializingBean, Applica
 
 	@Override
 	public void afterPropertiesSet() {
-		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("Property 'sessionFactory' is required");
+		if (getSession() == null) {
+			throw new IllegalArgumentException("Property 'session' is required");
 		}
 	}
 
 	public <T> T execute(Neo4jCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
-		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
+//		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
 
 		try {
 			Session sessionToExpose = createSessionProxy(session);

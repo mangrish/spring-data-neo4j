@@ -22,6 +22,7 @@ import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
 import org.springframework.data.neo4j.examples.movies.domain.Cinema;
 import org.springframework.data.neo4j.examples.movies.domain.Director;
@@ -52,6 +53,7 @@ public class DerivedQueryTest extends MultiDriverTestClass {
 
 	private static GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
 
+	@PersistenceContext
 	private Session session;
 
 	@Autowired
@@ -69,7 +71,6 @@ public class DerivedQueryTest extends MultiDriverTestClass {
 	@Before
 	public void init() throws IOException {
 		graphDatabaseService.execute("MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE r, n");
-		session = new SessionFactory("org.springframework.data.neo4j.examples.movies.domain").openSession();
 	}
 
 	@After

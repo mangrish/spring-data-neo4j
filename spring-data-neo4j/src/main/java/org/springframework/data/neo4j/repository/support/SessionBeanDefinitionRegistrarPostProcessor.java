@@ -21,7 +21,7 @@ import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
  */
 public class SessionBeanDefinitionRegistrarPostProcessor  implements BeanFactoryPostProcessor {
 
-	private static final List<Class<?>> SFP_TYPES;
+	private static final List<Class<?>> SF_TYPES;
 
 	static {
 
@@ -29,16 +29,16 @@ public class SessionBeanDefinitionRegistrarPostProcessor  implements BeanFactory
 		types.add(SessionFactory.class);
 		types.add(LocalSessionFactoryBean.class);
 
-		SFP_TYPES = Collections.unmodifiableList(types);
+		SF_TYPES = Collections.unmodifiableList(types);
 	}
 
 
-	public static Collection<SessionFactoryBeanDefinition> getSessionFactoryBeanDefinitions(
+	private static Collection<SessionFactoryBeanDefinition> getSessionFactoryBeanDefinitions(
 			ConfigurableListableBeanFactory beanFactory) {
 
 		List<SessionFactoryBeanDefinition> definitions = new ArrayList<>();
 
-		for (Class<?> type : SFP_TYPES) {
+		for (Class<?> type : SF_TYPES) {
 
 			for (String name : beanFactory.getBeanNamesForType(type, true, false)) {
 				definitions.add(new SessionFactoryBeanDefinition(transformedBeanName(name), beanFactory));

@@ -14,15 +14,14 @@
 package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.session.Session;
-import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
 import org.springframework.data.neo4j.repository.query.GraphQueryLookupStrategy;
-import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 
@@ -35,6 +34,7 @@ public class GraphRepositoryFactory extends RepositoryFactorySupport {
     private final Session session;
 
     public GraphRepositoryFactory(Session session) {
+        Assert.notNull(session);
         this.session = session;
     }
 

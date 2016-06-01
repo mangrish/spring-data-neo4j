@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
 import org.springframework.data.neo4j.examples.movies.domain.*;
 import org.springframework.data.neo4j.examples.movies.repo.*;
@@ -57,6 +58,7 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
 
     @Autowired
     private Session session;
+
     @Autowired
     private UserRepository userRepository;
     @Autowired

@@ -15,8 +15,6 @@ package org.springframework.data.neo4j.template.context;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
-import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.data.neo4j.template.Neo4jOperations;
@@ -33,23 +31,23 @@ import org.springframework.util.Assert;
 @EnableTransactionManagement
 public class Neo4jTemplateConfiguration {
 
-    @Bean
-    public PlatformTransactionManager transactionManager() throws Exception {
-        SessionFactory sessionFactory = sessionFactory();
-        Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
-        return new Neo4jTransactionManager(sessionFactory);
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager() throws Exception {
+		SessionFactory sessionFactory = sessionFactory();
+		Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+		return new Neo4jTransactionManager(sessionFactory);
+	}
 
-    @Bean
-    public Neo4jOperations neo4jTemplate() throws Exception {
-        return new Neo4jTemplate(sessionFactory());
-    }
+	@Bean
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(sessionFactory());
+	}
 
-    @Bean
-    public SessionFactory sessionFactory() {
-        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
-        lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
-        lsfb.afterPropertiesSet();
-        return lsfb.getObject();
-    }
+	@Bean
+	public SessionFactory sessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 }

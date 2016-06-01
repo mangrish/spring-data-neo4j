@@ -1,7 +1,5 @@
 package org.springframework.data.neo4j.support;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -57,17 +55,10 @@ public abstract class SharedSessionCreator {
 
 		private final boolean synchronizedWithTransaction;
 
-		private transient volatile ClassLoader proxyClassLoader;
-
 		public SharedSessionInvocationHandler(
 				SessionFactory target, boolean synchronizedWithTransaction) {
 			this.targetFactory = target;
 			this.synchronizedWithTransaction = synchronizedWithTransaction;
-			initProxyClassLoader();
-		}
-
-		private void initProxyClassLoader() {
-			this.proxyClassLoader = this.targetFactory.getClass().getClassLoader();
 		}
 
 		@Override
@@ -89,37 +80,28 @@ public abstract class SharedSessionCreator {
 				} catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
-			} else if (method.getName().equals("beginTransaction")) {
-				throw new IllegalStateException(
-						"Not allowed to create transaction on shared EntityManager - " +
-								"use Spring transactions or EJB CMT instead");
 			}
-
 			// Determine current EntityManager: either the transactional one
 			// managed by the factory or a temporary one for the given invocation.
-			Session target = SessionFactoryUtils.getSession(
-					this.targetFactory, this.synchronizedWithTransaction);
+			Session target = SessionFactoryUtils.getTransactionalSession(this.targetFactory, this.synchronizedWithTransaction);
 
-			if (method.getName().equals("getTargetSession")) {
-				// Handle EntityManagerProxy interface.
-				if (target == null) {
-					throw new IllegalStateException("No transactional Session available");
-				}
-				return target;
+			boolean isNewEm = false;
+			if (target == null) {
+				target = this.targetFactory.openSession();
+				isNewEm = true;
 			}
+
+			System.out.println("target session is: " + target);
 			// Invoke method on current EntityManager.
 			try {
 				return method.invoke(target, args);
 			} catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
+			} finally {
+				if (isNewEm) {
+					SessionFactoryUtils.closeSession(target);
+				}
 			}
-		}
-
-		private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-			// Rely on default serialization, just initialize state after deserialization.
-			ois.defaultReadObject();
-			// Initialize transient fields.
-			initProxyClassLoader();
 		}
 	}
 }

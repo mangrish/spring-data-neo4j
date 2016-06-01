@@ -18,7 +18,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.conversion.MetaDataDrivenConversionService;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.session.Neo4jSessionFactory;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.data.neo4j.template.Neo4jOperations;
@@ -38,29 +37,29 @@ import org.springframework.util.Assert;
 @EnableTransactionManagement
 public class ConversionServicePersistenceContext {
 
-    @Bean
-    public PlatformTransactionManager transactionManager() throws Exception {
-        SessionFactory sessionFactory = sessionFactory();
-        Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
-        return new Neo4jTransactionManager(sessionFactory);
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager() throws Exception {
+		SessionFactory sessionFactory = sessionFactory();
+		Assert.notNull(sessionFactory, "You must provide a SessionFactory instance in your Spring configuration classes");
+		return new Neo4jTransactionManager(sessionFactory);
+	}
 
-    @Bean
-    public Neo4jOperations neo4jTemplate() throws Exception {
-        return new Neo4jTemplate(sessionFactory());
-    }
+	@Bean
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(sessionFactory());
+	}
 
-    @Bean
-    public SessionFactory sessionFactory() {
-        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
-        lsfb.setPackagesToScan("org.springframework.data.neo4j.integration.conversion.domain");
-        lsfb.afterPropertiesSet();
-        return lsfb.getObject();
-    }
+	@Bean
+	public SessionFactory sessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.integration.conversion.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 
 
-    @Bean
-    public ConversionService conversionService() {
-        return new MetaDataDrivenConversionService(sessionFactory().getMetaData());
-    }
+	@Bean
+	public ConversionService conversionService() {
+		return new MetaDataDrivenConversionService(sessionFactory().getMetaData());
+	}
 }

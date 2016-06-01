@@ -11,7 +11,7 @@
  *
  */
 
-package org.springframework.data.neo4j.repository;
+package org.springframework.data.neo4j.repository.support;
 
 import org.neo4j.ogm.cypher.query.Pagination;
 import org.neo4j.ogm.cypher.query.SortOrder;
@@ -20,7 +20,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +34,7 @@ import java.util.List;
  * @author Luanne Misquitta
  */
 @Repository
+@Transactional
 public class GraphRepositoryImpl<T> implements GraphRepository<T> {
 
 
@@ -40,6 +44,10 @@ public class GraphRepositoryImpl<T> implements GraphRepository<T> {
     private final Session session;
 
     public GraphRepositoryImpl(Class<T> clazz, Session session) {
+
+        Assert.notNull(clazz);
+        Assert.notNull(session);
+
         this.clazz = clazz;
         this.session = session;
     }

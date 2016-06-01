@@ -20,6 +20,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.repositories.domain.User;
 import org.springframework.data.neo4j.repositories.repo.PersistenceContextInTheSamePackage;
 import org.springframework.data.neo4j.repositories.repo.UserRepository;
@@ -35,7 +36,7 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RepoScanningTest extends MultiDriverTestClass {
 
-    @Autowired
+    @PersistenceContext
     private Session session;
 
     @Autowired

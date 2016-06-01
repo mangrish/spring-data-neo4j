@@ -16,6 +16,7 @@ package org.springframework.data.neo4j.web.service;
 import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.web.domain.User;
 import org.springframework.data.neo4j.web.repo.UserRepository;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
+    @PersistenceContext
     private Session session;
 
     @Transactional

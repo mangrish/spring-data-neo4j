@@ -19,6 +19,9 @@ import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.neo4j.session.SessionFactory;
@@ -38,13 +41,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Vince Bickers
  * @author Mark Angrish
  */
-public class Neo4jTransactionManager extends AbstractPlatformTransactionManager implements ResourceTransactionManager, InitializingBean {
+public class Neo4jTransactionManager extends AbstractPlatformTransactionManager implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Neo4jTransactionManager.class);
 	private SessionFactory sessionFactory;
 
 	public Neo4jTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+		afterPropertiesSet();
 	}
 
 
@@ -118,9 +122,6 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	}
 
 
-
-
-
 	private void closeSessionAfterFailedBegin(Neo4jTransactionObject txObject) {
 		if (txObject.isNewSessionHolder()) {
 			Session session = txObject.getSessionHolder().getSession();
@@ -129,10 +130,10 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 					session.getTransaction().rollback();
 				}
 			} catch (Throwable ex) {
-				logger.debug("Could not rollback EntityManager after failed transaction begin", ex);
-			} //finally {
-//				session.clear();
-//			}
+				logger.debug("Could not rollback Session after failed transaction begin", ex);
+			} finally {
+				SessionFactoryUtils.closeSession(session);
+			}
 			txObject.setSessionHolder(null, false);
 		}
 	}
@@ -154,11 +155,6 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
-		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-			// From non-transactional code running in active transaction synchronization
-			// -> can be safely removed, will be closed on transaction completion.
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		}
 		TransactionSynchronizationManager.bindResource(
 				getSessionFactory(), resourcesHolder.getSessionHolder());
 	}
@@ -256,9 +252,9 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Neo4j Session [" + session + "] after transaction");
 			}
-			session.clear();
+			SessionFactoryUtils.closeSession(session);
 		} else {
-			logger.debug("Not closing pre-bound JPA EntityManager after transaction");
+			logger.debug("Not closing pre-bound Neo4j Session after transaction");
 		}
 	}
 
@@ -285,7 +281,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("'sessionFactory' is required");
 		}
@@ -294,6 +290,12 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	@Override
 	public Object getResourceFactory() {
 		return getSessionFactory();
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+
+		setSessionFactory(beanFactory.getBean(SessionFactory.class));
 	}
 
 
@@ -305,30 +307,30 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 		private Transaction rawTransaction;
 
-		public void setSessionHolder(
+		void setSessionHolder(
 				SessionHolder sessionHolder, boolean newSessionHolder) {
 			this.sessionHolder = sessionHolder;
 			this.newSessionHolder = newSessionHolder;
 		}
 
-		public SessionHolder getSessionHolder() {
+		SessionHolder getSessionHolder() {
 			return this.sessionHolder;
 		}
 
-		public boolean isNewSessionHolder() {
+		boolean isNewSessionHolder() {
 			return this.newSessionHolder;
 		}
 
-		public boolean hasTransaction() {
+		boolean hasTransaction() {
 			return (this.sessionHolder != null && this.sessionHolder.isTransactionActive());
 		}
 
-		public void setRawTransaction(Transaction rawTransaction) {
+		void setRawTransaction(Transaction rawTransaction) {
 			this.rawTransaction = rawTransaction;
 			this.sessionHolder.setTransactionActive(true);
 		}
 
-		public Transaction getRawTransaction() {
+		Transaction getRawTransaction() {
 			return this.rawTransaction;
 		}
 	}
@@ -336,7 +338,6 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	private static class SuspendedResourcesHolder {
 
 		private final SessionHolder sessionHolder;
-
 
 		private SuspendedResourcesHolder(SessionHolder sessionHolder) {
 			this.sessionHolder = sessionHolder;

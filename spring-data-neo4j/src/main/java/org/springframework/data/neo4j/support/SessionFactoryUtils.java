@@ -114,6 +114,14 @@ public class SessionFactoryUtils {
 		return (sessionHolder != null && (sessionHolder.getSession() == session));
 	}
 
+	public static Session getTransactionalSession(SessionFactory targetFactory, boolean synchronizedWithTransaction) {
+		return null;
+	}
+
+	public static void closeSession(Session target) {
+
+	}
+
 
 	private static class SessionSynchronization
 			extends ResourceHolderSynchronization<SessionHolder, SessionFactory>

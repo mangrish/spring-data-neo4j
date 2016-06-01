@@ -20,6 +20,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.annotation.PersistenceContext;
 import org.springframework.data.neo4j.repositories.context.RepositoriesTestContext;
 import org.springframework.data.neo4j.repositories.domain.Movie;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
@@ -40,7 +41,7 @@ public class RepositoryDefinitionTest extends MultiDriverTestClass {
 
     private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
 
-    @Autowired
+    @PersistenceContext
     private Session session;
 
     @Before
