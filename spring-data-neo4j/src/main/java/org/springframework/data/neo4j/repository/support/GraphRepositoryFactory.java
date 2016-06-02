@@ -23,6 +23,7 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 
@@ -36,6 +37,7 @@ public class GraphRepositoryFactory extends RepositoryFactorySupport {
     private final Neo4jOperations neo4jOperations;
 
     public GraphRepositoryFactory(Session session, Neo4jOperations neo4jOperations) {
+        Assert.notNull(session);
         this.session = session;
         this.neo4jOperations = neo4jOperations;
     }
