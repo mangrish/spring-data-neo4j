@@ -56,7 +56,7 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
     private final Logger logger = LoggerFactory.getLogger(MoviesIntegrationTest.class);
 
 
-    @Autowired
+    @PersistenceContext
     private Session session;
 
     @Autowired

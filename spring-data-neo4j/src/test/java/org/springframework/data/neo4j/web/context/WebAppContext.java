@@ -55,12 +55,12 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public PlatformTransactionManager transactionManager() throws Exception {
+	public PlatformTransactionManager transactionManager()  {
 		return new Neo4jTransactionManager(sessionFactory());
 	}
 
 	@Bean
-	public SessionFactory sessionFactory() throws Exception {
+	public SessionFactory sessionFactory() {
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.web.domain");
 		lsfb.afterPropertiesSet();

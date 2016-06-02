@@ -111,7 +111,7 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 			// JPA 2.1's createEntityManager(SynchronizationType, Map)
 			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
 			Session rawEntityManager = getNativeSessionFactory().openSession();
-			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
+//			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
 		}
 
 		// Standard delegation to the native factory, just post-processing EntityManager return values
@@ -120,7 +120,7 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 		if (retVal instanceof Session) {
 			// Any other createEntityManager variant - expecting non-synchronized semantics
 			Session rawEntityManager = (Session) retVal;
-			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
+//			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
 		}
 		return retVal;
 	}

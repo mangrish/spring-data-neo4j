@@ -15,7 +15,6 @@ package org.springframework.data.neo4j.integration.conversion;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.conversion.MetaDataDrivenConversionService;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.data.neo4j.session.SessionFactory;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.Assert;
 
 /**
- * {@link Neo4jConfiguration} for testing Spring's type conversion service support.
  *
  * @author Adam George
  */
