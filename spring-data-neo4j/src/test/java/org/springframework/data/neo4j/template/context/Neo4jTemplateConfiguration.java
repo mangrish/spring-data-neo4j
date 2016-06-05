@@ -13,10 +13,11 @@
 
 package org.springframework.data.neo4j.template.context;
 
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -31,12 +32,12 @@ public class Neo4jTemplateConfiguration extends Neo4jConfiguration {
     @Override
     @Bean
     public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
+        return new SessionFactoryImpl("org.springframework.data.neo4j.examples.movies.domain");
     }
 
     @Bean
     public Neo4jOperations template() throws Exception {
-        return new Neo4jTemplate(getSession());
+        return new Neo4jTemplate(getSessionFactory());
     }
 
 }

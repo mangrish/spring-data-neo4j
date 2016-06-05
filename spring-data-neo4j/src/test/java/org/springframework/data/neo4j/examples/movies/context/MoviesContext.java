@@ -14,12 +14,14 @@
 package org.springframework.data.neo4j.examples.movies.context;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -31,15 +33,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class MoviesContext extends Neo4jConfiguration {
 
-    @Override
     @Bean
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.movies.domain");
-    }
-
     @Override
-    @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
+    public SessionFactory getSessionFactory() throws Exception {
+        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+        lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+        lsfb.afterPropertiesSet();
+        return lsfb.getObject();
     }
 }

@@ -1,7 +1,7 @@
 package org.springframework.data.neo4j.transactions;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.neo4j.ogm.transaction.Transaction;
 
 /**

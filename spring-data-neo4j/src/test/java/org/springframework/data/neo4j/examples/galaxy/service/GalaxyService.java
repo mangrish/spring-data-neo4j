@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.examples.galaxy.domain.World;
 import org.springframework.data.neo4j.examples.galaxy.repo.WorldRepository;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +40,7 @@ public class GalaxyService {
     private WorldRepository worldRepository;
 
     @Autowired
-    Session session;
+    SessionFactory sessionFactory;
 
     public long getNumberOfWorlds() {
         return worldRepository.count();
@@ -119,9 +120,9 @@ public class GalaxyService {
     public Collection<World> makeAllWorldsAtOnce() {
 
         Collection<World> worlds = new ArrayList<World>();
-        
+
         // Solar worlds
-        
+
         worlds.add(new World("Mercury", 0));
         worlds.add(new World("Venus", 0));
 
@@ -150,22 +151,22 @@ public class GalaxyService {
 
         return worlds;
     }
-    
+
     public void deleteAll() {
         worldRepository.deleteAll();
     }
 
     private Iterable<World> findByProperty(String propertyName, Object propertyValue) {
-        return session.loadAll(World.class, new Filter(propertyName, propertyValue));
+        return sessionFactory.getCurrentSession().loadAll(World.class, new Filter(propertyName, propertyValue));
     }
 
     public Iterable<World> findByProperty(String propertyName, Object propertyValue, int depth) {
-        return session.loadAll(World.class, new Filter(propertyName, propertyValue), depth);
+        return sessionFactory.getCurrentSession().loadAll(World.class, new Filter(propertyName, propertyValue), depth);
     }
 
 
     public Iterable<World> findAllWorlds(Pagination paging) {
-        return session.loadAll(World.class, paging, 0);
+        return sessionFactory.getCurrentSession().loadAll(World.class, paging, 0);
 
     }
 

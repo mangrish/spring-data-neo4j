@@ -1,6 +1,7 @@
 package org.springframework.data.neo4j.transaction;
 
 import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.transaction.Transaction;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -11,7 +12,7 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	private final Session session;
 
-	private boolean transactionActive;
+	private Transaction transaction;
 
 	public SessionHolder(Session session) {
 		Assert.notNull(session, "Session must not be null");
@@ -23,18 +24,17 @@ public class SessionHolder extends ResourceHolderSupport {
 		return this.session;
 	}
 
-	protected void setTransactionActive(boolean transactionActive) {
-		this.transactionActive = transactionActive;
+	public void setTransaction(Transaction transaction) {
+		this.transaction = transaction;
 	}
 
-	protected boolean isTransactionActive() {
-		return this.transactionActive;
+	public Transaction getTransaction() {
+		return this.transaction;
 	}
-
 
 	@Override
 	public void clear() {
 		super.clear();
-		this.transactionActive = false;
+		this.transaction = null;
 	}
 }

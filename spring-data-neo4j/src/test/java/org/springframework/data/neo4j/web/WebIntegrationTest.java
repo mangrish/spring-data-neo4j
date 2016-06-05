@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.web.context.WebAppContext;
 import org.springframework.data.neo4j.web.domain.User;
 import org.springframework.data.neo4j.web.repo.UserRepository;
@@ -53,14 +54,13 @@ public class WebIntegrationTest extends MultiDriverTestClass {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private Session session;
+	private SessionFactory sessionFactory;
 
 	private MockMvc mockMvc;
 
 	@Before
 	public void setUp() {
 
-		session.purgeDatabase();
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 

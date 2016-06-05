@@ -24,6 +24,7 @@ import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.annotation.QueryResult;
 import org.springframework.data.neo4j.repository.query.derived.DerivedGraphRepositoryQuery;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryMethod;
@@ -36,17 +37,17 @@ import org.springframework.data.repository.query.RepositoryQuery;
  */
 public class GraphQueryMethod extends QueryMethod {
 
-    private final Session session;
+    private final SessionFactory sessionFactory;
     private final Method method;
     private final Query queryAnnotation;
     private final Integer queryDepthParamIndex;
     private final Integer queryDepth;
     private boolean staticDepth;
 
-    public GraphQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, Session session) {
+    public GraphQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, SessionFactory sessionFactory) {
         super(method, metadata, factory);
         this.method = method;
-        this.session = session;
+        this.sessionFactory = sessionFactory;
         this.queryAnnotation = method.getAnnotation(Query.class);
         this.queryDepthParamIndex = getQueryDepthParamIndex(method);
         this.queryDepth = getStaticQueryDepth(method);
@@ -99,11 +100,11 @@ public class GraphQueryMethod extends QueryMethod {
     public RepositoryQuery createQuery() {
         if (method.getAnnotation(Query.class) != null) {
             if (resolveConcreteReturnType().isAnnotationPresent(QueryResult.class)) {
-                return new QueryResultGraphRepositoryQuery(this, session);
+                return new QueryResultGraphRepositoryQuery(this, sessionFactory.getCurrentSession());
             }
-            return new GraphRepositoryQuery(this, session);
+            return new GraphRepositoryQuery(this, sessionFactory.getCurrentSession());
         }
-        return new DerivedGraphRepositoryQuery(this, session);
+        return new DerivedGraphRepositoryQuery(this, sessionFactory.getCurrentSession());
 
     }
 

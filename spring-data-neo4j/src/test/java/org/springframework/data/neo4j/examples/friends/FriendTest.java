@@ -25,6 +25,7 @@ import org.springframework.data.neo4j.examples.friends.context.FriendContext;
 import org.springframework.data.neo4j.examples.friends.domain.Friendship;
 import org.springframework.data.neo4j.examples.friends.domain.Person;
 import org.springframework.data.neo4j.examples.friends.repo.FriendshipRepository;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FriendTest extends MultiDriverTestClass {
 
-	@Autowired Session session;
+	@Autowired SessionFactory sessionFactory;
 	@Autowired Neo4jOperations neo4jTemplate;
 	@Autowired FriendshipRepository friendshipRepository;
 	@Autowired FriendService friendService;
@@ -48,8 +49,8 @@ public class FriendTest extends MultiDriverTestClass {
 	public void savingPersonWhenTransactionalShouldWork() {
 		friendService.createPersonAndFriends();
 
-		session.clear();
-		Person john = session.loadAll(Person.class, new Filter("firstName", "John")).iterator().next();
+		sessionFactory.getCurrentSession().clear();
+		Person john = sessionFactory.getCurrentSession().loadAll(Person.class, new Filter("firstName", "John")).iterator().next();
 		assertNotNull(john);
 		assertEquals(2, john.getFriendships().size());;
 	}

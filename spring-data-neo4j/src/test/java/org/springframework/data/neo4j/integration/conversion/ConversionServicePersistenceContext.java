@@ -12,14 +12,14 @@
  */
 package org.springframework.data.neo4j.integration.conversion;
 
-import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.conversion.MetaDataDrivenConversionService;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -32,20 +32,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class ConversionServicePersistenceContext extends Neo4jConfiguration {
 
-    @Override
-    @Bean
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.integration.conversion.domain");
-    }
+	@Bean
+	@Override
+	public SessionFactory getSessionFactory() throws Exception {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.integration.conversion.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 
-    @Override
-    @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
-    }
-
-    @Bean
-    public ConversionService conversionService() {
-        return new MetaDataDrivenConversionService(getSessionFactory().metaData());
-    }
+	@Bean
+	public ConversionService conversionService() throws Exception {
+		return new MetaDataDrivenConversionService(getSessionFactory().getMetaData());
+	}
 }

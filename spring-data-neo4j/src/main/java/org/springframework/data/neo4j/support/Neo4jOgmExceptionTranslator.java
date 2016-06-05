@@ -11,7 +11,7 @@
  *
  */
 
-package org.springframework.data.neo4j.template;
+package org.springframework.data.neo4j.support;
 
 import org.neo4j.ogm.exception.InvalidDepthException;
 import org.neo4j.ogm.exception.NotFoundException;

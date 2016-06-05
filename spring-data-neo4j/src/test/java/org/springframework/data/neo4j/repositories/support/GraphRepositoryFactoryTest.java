@@ -23,6 +23,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,13 +41,13 @@ public class GraphRepositoryFactoryTest extends MultiDriverTestClass {
 
     GraphRepositoryFactory factory;
 
-    @Mock org.neo4j.ogm.session.Session session;
+    @Mock SessionFactory sessionFactory;
     @Mock Neo4jOperations neo4jOperations;
 
     @Before
     public void setUp() {
 
-        factory = new GraphRepositoryFactory(session, neo4jOperations) {
+        factory = new GraphRepositoryFactory(sessionFactory, neo4jOperations) {
 
         };
     }

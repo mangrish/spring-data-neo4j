@@ -13,12 +13,14 @@
 
 package org.springframework.data.neo4j.examples.friends.context;
 
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -32,8 +34,10 @@ public class FriendContext extends Neo4jConfiguration {
 
     @Bean
     @Override
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.examples.friends.domain");
+    public SessionFactory getSessionFactory() throws Exception {
+        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+        lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.friends.domain");
+        lsfb.afterPropertiesSet();
+        return lsfb.getObject();
     }
-
 }

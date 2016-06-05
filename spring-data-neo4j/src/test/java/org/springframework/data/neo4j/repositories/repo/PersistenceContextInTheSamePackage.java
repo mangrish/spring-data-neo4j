@@ -14,11 +14,13 @@
 package org.springframework.data.neo4j.repositories.repo;
 
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -29,14 +31,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class PersistenceContextInTheSamePackage extends Neo4jConfiguration {
 
-    @Override
-    public SessionFactory getSessionFactory() {
-        return new SessionFactory("org.springframework.data.neo4j.repositories.domain");
-    }
-
-    @Override
     @Bean
-    public Session getSession() throws Exception {
-        return super.getSession();
+    @Override
+    public SessionFactory getSessionFactory() throws Exception {
+        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+        lsfb.setPackagesToScan("org.springframework.data.neo4j.repositories.domain");
+        lsfb.afterPropertiesSet();
+        return lsfb.getObject();
     }
 }

@@ -32,6 +32,7 @@ import org.springframework.data.neo4j.examples.movies.repo.*;
 import org.springframework.data.neo4j.examples.movies.service.UserService;
 import org.springframework.data.neo4j.server.InProcessServer;
 import org.springframework.data.neo4j.server.Neo4jServer;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -58,7 +59,7 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
 
 
     @Autowired
-    private Session session;
+    private SessionFactory sessionFactory;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -78,8 +79,9 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
 
     @Before
     public void clear() {
-        session.clear();
-        session.purgeDatabase();
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.clear();
+        currentSession.purgeDatabase();
     }
 
     @Test
@@ -573,11 +575,11 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
     }
 
     protected Iterable<?> findByProperty(Class clazz, String propertyName, Object propertyValue) {
-        return session.loadAll(clazz, new Filter(propertyName, propertyValue));
+        return sessionFactory.getCurrentSession().loadAll(clazz, new Filter(propertyName, propertyValue));
     }
 
     protected Iterable<?> findByProperty(Class clazz, String propertyName, Object propertyValue, int depth) {
-        return session.loadAll(clazz, new Filter(propertyName, propertyValue), depth);
+        return sessionFactory.getCurrentSession().loadAll(clazz, new Filter(propertyName, propertyValue), depth);
     }
 
     //

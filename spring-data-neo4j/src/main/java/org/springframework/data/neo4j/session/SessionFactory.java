@@ -9,7 +9,7 @@ import org.neo4j.ogm.session.Session;
 public interface SessionFactory {
 
 	/**
-	 * Retrieves the meta-data that was built up when this {@link org.neo4j.ogm.session.SessionFactory} was constructed.
+	 * Retrieves the meta-data that was built up when this {@link SessionFactory} was constructed.
 	 *
 	 * @return The underlying {@link MetaData}
 	 */

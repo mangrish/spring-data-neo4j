@@ -16,13 +16,14 @@ package org.springframework.data.neo4j.repositories;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.data.neo4j.repositories.domain.Movie;
 import org.springframework.data.neo4j.repositories.domain.User;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
 import org.springframework.data.neo4j.repositories.repo.UserRepository;
 import org.springframework.data.neo4j.repository.support.GraphRepositoryFactory;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.util.IterableUtils;
@@ -38,21 +39,19 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
 
     private MovieRepository movieRepository;
-    private SessionFactory sessionFactory = new SessionFactory("org.springframework.data.neo4j.repositories.domain");
-    private Session session;
+    private SessionFactory sessionFactory = new SessionFactoryImpl("org.springframework.data.neo4j.repositories.domain");
     private Neo4jOperations neo4jOperations;
 
     @Before
     public void init() {
-        session = sessionFactory.openSession();
-        neo4jOperations = new Neo4jTemplate(session);
-        session.purgeDatabase();
+        neo4jOperations = new Neo4jTemplate(sessionFactory);
+        sessionFactory.getCurrentSession().purgeDatabase();
     }
 
     @Test
     public void canInstantiateRepositoryProgrammatically() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new GraphRepositoryFactory(sessionFactory, neo4jOperations);
 
         movieRepository = factory.getRepository(MovieRepository.class);
 
@@ -70,7 +69,7 @@ public class ProgrammaticRepositoryTest extends MultiDriverTestClass {
     @Test
     public void shouldBeAbleToDeleteAllViaRepository() {
 
-        RepositoryFactorySupport factory = new GraphRepositoryFactory(session, neo4jOperations);
+        RepositoryFactorySupport factory = new GraphRepositoryFactory(sessionFactory, neo4jOperations);
 
         UserRepository userRepository = factory.getRepository(UserRepository.class);
 

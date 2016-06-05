@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.ogm.session.Session;
-import org.neo4j.ogm.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.examples.movies.context.MoviesContext;
@@ -31,6 +31,7 @@ import org.springframework.data.neo4j.examples.movies.repo.CinemaRepository;
 import org.springframework.data.neo4j.examples.movies.repo.DirectorRepository;
 import org.springframework.data.neo4j.examples.movies.repo.RatingRepository;
 import org.springframework.data.neo4j.examples.movies.repo.UserRepository;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -69,7 +70,7 @@ public class DerivedQueryTest extends MultiDriverTestClass {
 	@Before
 	public void init() throws IOException {
 		graphDatabaseService.execute("MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE r, n");
-		session = new SessionFactory("org.springframework.data.neo4j.examples.movies.domain").openSession();
+		session = new SessionFactoryImpl("org.springframework.data.neo4j.examples.movies.domain").openSession();
 	}
 
 	@After
