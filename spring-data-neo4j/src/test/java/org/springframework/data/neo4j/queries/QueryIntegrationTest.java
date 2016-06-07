@@ -52,6 +52,7 @@ import org.springframework.data.neo4j.examples.movies.repo.UserRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Vince Bickers
@@ -67,10 +68,8 @@ public class QueryIntegrationTest extends MultiDriverTestClass {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CinemaRepository cinemaRepository;
-
     @Before
+    @Transactional
     public void init() {
         clearDatabase();
     }

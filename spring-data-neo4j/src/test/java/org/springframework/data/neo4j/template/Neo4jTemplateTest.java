@@ -35,6 +35,7 @@ import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.template.context.Neo4jTemplateConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -226,6 +227,7 @@ public class Neo4jTemplateTest extends MultiDriverTestClass {
      * @see DATAGRAPH-685
      */
     @Test
+    @Transactional
     public void shouldRetrieveEntitiesByMatchingPropertiesAndDepth() {
         User user = new User("Harmanpreet Singh");
         user.setMiddleName("A");

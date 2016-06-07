@@ -25,6 +25,7 @@ import org.springframework.data.neo4j.transactions.service.ServiceB;
 import org.springframework.data.neo4j.transactions.service.WrapperService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -110,6 +111,7 @@ public class ExtendedTransactionsTest extends MultiDriverTestClass {
     }
 
     @Test
+    @Transactional
     public void shouldRollbackRepositoryMethodOnCheckedException() {
         try {
             serviceA.run();

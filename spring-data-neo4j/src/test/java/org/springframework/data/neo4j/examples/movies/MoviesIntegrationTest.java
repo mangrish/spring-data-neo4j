@@ -13,6 +13,7 @@
 
 package org.springframework.data.neo4j.examples.movies;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -53,10 +55,10 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 @ContextConfiguration(classes = {MoviesContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
+@Transactional
 public class MoviesIntegrationTest extends MultiDriverTestClass {
 
     private final Logger logger = LoggerFactory.getLogger(MoviesIntegrationTest.class);
-
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -77,11 +79,10 @@ public class MoviesIntegrationTest extends MultiDriverTestClass {
     @Autowired
     private RatingRepository ratingRepository;
 
-    @Before
+    @After
     public void clear() {
-        Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.clear();
-        currentSession.purgeDatabase();
+        sessionFactory.getCurrentSession().clear();
+        sessionFactory.getCurrentSession().purgeDatabase();
     }
 
     @Test

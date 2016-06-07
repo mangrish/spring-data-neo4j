@@ -42,6 +42,5 @@ public interface Neo4jCallback<T> {
 	 * @throws RuntimeException if thrown by the Neo4j OGM API
 	 * @see Neo4jTemplate#execute
 	 */
-	@Transactional
 	T doInNeo4j(Session session) throws RuntimeException;
 }

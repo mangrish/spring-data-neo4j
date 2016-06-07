@@ -23,8 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.neo4j.session.SessionContext;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.session.SessionFactoryUtils;
+import org.springframework.data.neo4j.support.SpringSessionContext;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -76,7 +78,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	/**
 	 * Set whether to operate on a Neo4j OGM-managed Session instead of a
 	 * Spring-managed Session, that is, whether to obtain the Session through
-	 * Hibernate's {@link SessionFactory#getCurrentSession()}
+	 * Neo4j OGM's {@link SessionFactory#getCurrentSession()}
 	 * instead of {@link SessionFactory#openSession()} (with a Spring
 	 * {@link TransactionSynchronizationManager}
 	 * check preceding it).
@@ -87,8 +89,8 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	 * Note that this requires {@link SessionFactory#getCurrentSession()}
 	 * to always return a proper Session when called for a Spring-managed transaction;
 	 * transaction begin will fail if the {@code getCurrentSession()} call fails.
-	 * <p>This mode will typically be used in combination with a custom Hibernate
-	 * {@link org.hibernate.context.spi.CurrentSessionContext} implementation that stores
+	 * <p>This mode will typically be used in combination with a custom Neo4j OGM
+	 * {@link SessionContext} implementation that stores
 	 * Sessions in a place other than Spring's TransactionSynchronizationManager.
 	 * It may also be used in combination with Spring's Open-Session-in-View support
 	 * (using Spring's default {@link SpringSessionContext}), in which case it subtly
@@ -145,26 +147,22 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 			if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
 				Session newSession = getSessionFactory().openSession();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
+					logger.debug("Opened new Session [" + newSession + "] for Neo4j OGM transaction");
 				}
 				txObject.setSession(newSession);
 			}
 
 			session = txObject.getSessionHolder().getSession();
 
-			// Not allowed to change the transaction settings of the JDBC Connection.
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				// We should set a specific isolation level but are not allowed to...
 				throw new InvalidIsolationLevelException(
 						"Neo4jTransactionManager is not allowed to support custom isolation levels.");
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
-			}
 
 			Transaction hibTx = session.beginTransaction();
 
-			// Add the Hibernate transaction to the sessionFactory holder.
+			// Add the Neo4j OGM transaction to the sessionFactory holder.
 			txObject.getSessionHolder().setTransaction(hibTx);
 
 			// Bind the sessionFactory holder to the thread.
@@ -227,10 +225,8 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		try {
 			txObject.getSessionHolder().getTransaction().commit();
 		} catch (TransactionException ex) {
-			// assumably from commit call to the underlying JDBC connection
-			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
+			throw new TransactionSystemException("Could not commit Neo4j OGM transaction", ex);
 		} catch (RuntimeException ex) {
-			// assumably failed to flush changes to database
 			throw convertNeo4jOgmAccessException(ex);
 		}
 	}
@@ -245,7 +241,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 		try {
 			txObject.getSessionHolder().getTransaction().rollback();
 		} catch (TransactionException ex) {
-			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
+			throw new TransactionSystemException("Could not roll back Neo4j OGM transaction", ex);
 		} catch (RuntimeException ex) {
 			// Shouldn't really happen, as a rollback doesn't cause a flush.
 			throw convertNeo4jOgmAccessException(ex);
@@ -282,12 +278,12 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 		if (txObject.isNewSession()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Closing Hibernate Session [" + session + "] after transaction");
+				logger.debug("Closing Neo4j OGM Session [" + session + "] after transaction");
 			}
 			SessionFactoryUtils.closeSession(sessionFactory, session);
 		} else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Not closing pre-bound Hibernate Session [" + session + "] after transaction");
+				logger.debug("Not closing pre-bound Neo4j OGM Session [" + session + "] after transaction");
 			}
 		}
 		txObject.getSessionHolder().clear();

@@ -30,6 +30,7 @@ import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Luanne Misquitta
@@ -38,7 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FriendTest extends MultiDriverTestClass {
 
-	SessionFactory sessionFactory = new SessionFactoryImpl();
+	@Autowired SessionFactory sessionFactory;
 	@Autowired Neo4jOperations neo4jTemplate;
 	@Autowired FriendshipRepository friendshipRepository;
 	@Autowired FriendService friendService;
@@ -47,6 +48,7 @@ public class FriendTest extends MultiDriverTestClass {
 	 * @see DATAGRAPH-703
 	 */
 	@Test
+	@Transactional
 	public void savingPersonWhenTransactionalShouldWork() {
 		friendService.createPersonAndFriends();
 
@@ -60,6 +62,7 @@ public class FriendTest extends MultiDriverTestClass {
 	 * @see DATAGRAPH-694
 	 */
 	@Test
+	@Transactional
 	public void circularParamtersShouldNotProduceInfiniteRecursion() {
 		Person john = new Person();
 		john.setFirstName("John");
