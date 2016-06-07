@@ -36,17 +36,9 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 public class RepoScanningTest extends MultiDriverTestClass {
 
     @Autowired
-    private Session session;
-
-    @Autowired
     private UserRepository userRepository;
 
     private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
-
-    @Before
-    public void init() {
-        session.purgeDatabase();
-    }
 
     @Test
     public void enableNeo4jRepositoriesShouldScanSelfPackageByDefault() {

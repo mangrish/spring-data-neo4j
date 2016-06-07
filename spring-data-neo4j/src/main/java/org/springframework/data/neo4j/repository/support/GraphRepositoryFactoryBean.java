@@ -21,6 +21,7 @@ import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
+import org.springframework.util.Assert;
 
 
 /**
@@ -37,12 +38,13 @@ public class GraphRepositoryFactoryBean<S extends Repository<T, Long>, T> extend
 
     @Override
     public void setMappingContext(MappingContext<?, ?> mappingContext) {
-        super.setMappingContext(mappingContext);
+        super.setMappingContext(new Neo4jMappingContext(sessionFactory.getMetaData()));
     }
 
     @Override
     public void afterPropertiesSet() {
-        setMappingContext(new Neo4jMappingContext(sessionFactory.getMetaData()));
+        Assert.notNull(sessionFactory, "SessionFactory must not be null!");
+        Assert.notNull(neo4jOperations, "Neo4jOperations must not be null!");
         super.afterPropertiesSet();
     }
 

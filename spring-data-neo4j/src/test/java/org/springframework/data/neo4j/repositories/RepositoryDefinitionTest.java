@@ -13,23 +13,20 @@
 
 package org.springframework.data.neo4j.repositories;
 
-import org.junit.Before;
+import static org.junit.Assert.*;
+import static org.neo4j.ogm.testutil.GraphTestUtils.*;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.repositories.context.RepositoriesTestContext;
 import org.springframework.data.neo4j.repositories.domain.Movie;
 import org.springframework.data.neo4j.repositories.repo.MovieRepository;
-import org.springframework.data.neo4j.repositories.repo.UserRepository;
 import org.springframework.data.neo4j.util.IterableUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import static org.junit.Assert.assertEquals;
-import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 
 /**
  * @author Michal Bachman
@@ -38,27 +35,18 @@ import static org.neo4j.ogm.testutil.GraphTestUtils.assertSameGraph;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RepositoryDefinitionTest extends MultiDriverTestClass {
 
-    private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
+	private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
 
-    @Autowired
-    private Session session;
+	@Autowired
+	private MovieRepository movieRepository;
 
-    @Before
-    public void init() {
-        session.purgeDatabase();
-    }
+	@Test
+	public void shouldProxyAndAutoImplementRepositoryDefinitionAnnotatedRepo() {
+		Movie movie = new Movie("PF");
+		movieRepository.save(movie);
 
-    @Autowired
-    private MovieRepository movieRepository;
+		assertSameGraph(graphDatabaseService, "CREATE (m:Movie {title:'PF'})");
 
-    @Test
-    public void shouldProxyAndAutoImplementRepositoryDefinitionAnnotatedRepo() {
-        Movie movie = new Movie("PF");
-        movieRepository.save(movie);
-
-        assertSameGraph(graphDatabaseService, "CREATE (m:Movie {title:'PF'})");
-
-        assertEquals(1, IterableUtils.count(movieRepository.findAll()));
-    }
-
+		assertEquals(1, IterableUtils.count(movieRepository.findAll()));
+	}
 }

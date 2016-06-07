@@ -16,9 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Created by markangrish on 14/05/2016.
- */
+
 public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
@@ -62,7 +60,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		} else {
 			if (!isAsyncDispatch(request)) {
-				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
+				logger.debug("Opening Neo4j OGM Session in OpenSessionInViewFilter");
 				Session session = openSession(sessionFactory);
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
@@ -76,7 +74,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
 				if (!isAsyncStarted(request)) {
-					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+					logger.debug("Closing Neo4j OGM Session in OpenSessionInViewFilter");
 					SessionFactoryUtils.closeSession(sessionFactory, sessionHolder.getSession());
 				}
 			}

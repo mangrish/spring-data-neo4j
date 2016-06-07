@@ -55,17 +55,18 @@ public class SpringSessionContext implements SessionContext {
 			return session;
 		}
 
+		Session session = sessionFactory.openSession();
+
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			Session session = this.sessionFactory.openSession();
 			SessionHolder sessionHolder = new SessionHolder(session);
 			TransactionSynchronizationManager.registerSynchronization(
 					new SpringSessionSynchronization(sessionHolder, this.sessionFactory, true));
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, sessionHolder);
 			sessionHolder.setSynchronizedWithTransaction(true);
 			return session;
-		} else {
-			throw new RuntimeException("Could not obtain transaction-synchronized Session for current thread");
 		}
+
+		return session;
 	}
 
 	@Override

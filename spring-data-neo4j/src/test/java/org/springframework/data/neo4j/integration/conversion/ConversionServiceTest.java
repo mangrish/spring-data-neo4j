@@ -28,6 +28,7 @@ import org.springframework.data.neo4j.integration.conversion.domain.JavaElement;
 import org.springframework.data.neo4j.integration.conversion.domain.MonetaryAmount;
 import org.springframework.data.neo4j.integration.conversion.domain.PensionPlan;
 import org.springframework.data.neo4j.integration.conversion.domain.SiteMember;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -58,11 +59,11 @@ public class ConversionServiceTest extends MultiDriverTestClass {
     @Autowired
     private GenericConversionService conversionService;
 
-    @Autowired Session session;
+    @Autowired SessionFactory sessionFactory;
 
     @After
     public void cleanUpDatabase() {
-        session.purgeDatabase();
+        sessionFactory.getCurrentSession().purgeDatabase();
     }
 
     /**
@@ -183,9 +184,9 @@ public class ConversionServiceTest extends MultiDriverTestClass {
         siteMember.setProfilePictureData(binaryData);
         this.siteMemberRepository.save(siteMember);
 
-        session.clear();
+        sessionFactory.getCurrentSession().clear();
 
-        siteMember = session.loadAll(SiteMember.class).iterator().next();
+        siteMember = sessionFactory.getCurrentSession().loadAll(SiteMember.class).iterator().next();
         assertArrayEquals(binaryData, siteMember.getProfilePictureData());
     }
 
@@ -202,9 +203,9 @@ public class ConversionServiceTest extends MultiDriverTestClass {
         siteMember.setYears(BigInteger.valueOf(50));
         this.siteMemberRepository.save(siteMember);
 
-        session.clear();
+        sessionFactory.getCurrentSession().clear();
 
-        siteMember = session.loadAll(SiteMember.class).iterator().next();
+        siteMember = sessionFactory.getCurrentSession().loadAll(SiteMember.class).iterator().next();
         assertArrayEquals(binaryData, siteMember.getProfilePictureData());
         assertEquals(50, siteMember.getYears().intValue());
     }
@@ -218,9 +219,9 @@ public class ConversionServiceTest extends MultiDriverTestClass {
         siteMember.setRoundingModes(Arrays.asList(RoundingMode.DOWN, RoundingMode.FLOOR));
         this.siteMemberRepository.save(siteMember);
 
-        session.clear();
+        sessionFactory.getCurrentSession().clear();
 
-        siteMember = session.loadAll(SiteMember.class).iterator().next();
+        siteMember = sessionFactory.getCurrentSession().loadAll(SiteMember.class).iterator().next();
         assertEquals(2, siteMember.getRoundingModes().size());
         assertTrue(siteMember.getRoundingModes().contains(RoundingMode.DOWN));
         assertTrue(siteMember.getRoundingModes().contains(RoundingMode.FLOOR));
