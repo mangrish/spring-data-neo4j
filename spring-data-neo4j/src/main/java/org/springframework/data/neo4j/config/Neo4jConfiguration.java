@@ -43,35 +43,9 @@ public abstract class Neo4jConfiguration {
 
 	private final Logger logger = LoggerFactory.getLogger(Neo4jConfiguration.class);
 
-	@Resource
-	private Environment environment;
-
 	@Bean
 	public Neo4jOperations neo4jTemplate() throws Exception {
 		return new Neo4jTemplate(getSessionFactory());
-	}
-
-	@Bean
-	public Neo4jMappingContext neo4jMappingContext() throws Exception {
-		return new Neo4jMappingContext(getSessionFactory().getMetaData());
-	}
-
-	@Bean
-	public PersistenceExceptionTranslator persistenceExceptionTranslator() {
-		logger.info("Initialising PersistenceExceptionTranslator");
-		return new PersistenceExceptionTranslator() {
-			@Override
-			public DataAccessException translateExceptionIfPossible(RuntimeException e) {
-				logger.info("Intercepted exception");
-				throw Neo4jOgmExceptionTranslator.translateExceptionIfPossible(e);
-			}
-		};
-	}
-
-	@Bean
-	public PersistenceExceptionTranslationInterceptor translationInterceptor() {
-		logger.info("Initialising PersistenceExceptionTranslationInterceptor");
-		return new PersistenceExceptionTranslationInterceptor(persistenceExceptionTranslator());
 	}
 
 	@Bean
@@ -81,12 +55,6 @@ public abstract class Neo4jConfiguration {
 		transactionManager.setSessionFactory(getSessionFactory());
 		transactionManager.afterPropertiesSet();
 		return transactionManager;
-	}
-
-	@Bean
-	PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor() {
-		logger.info("Initialising PersistenceExceptionTranslationPostProcessor");
-		return new PersistenceExceptionTranslationPostProcessor();
 	}
 
 	@Bean

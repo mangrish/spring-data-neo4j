@@ -4,7 +4,6 @@ package org.springframework.data.neo4j.support;
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.session.SessionContext;
 import org.springframework.data.neo4j.session.SessionFactoryImpl;
-import org.springframework.data.neo4j.session.SessionFactoryUtils;
 import org.springframework.data.neo4j.transaction.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -71,6 +70,5 @@ public class SpringSessionContext implements SessionContext {
 
 	@Override
 	public void closeSession(Session session) {
-		SessionFactoryUtils.closeSession(sessionFactory, session);
 	}
 }

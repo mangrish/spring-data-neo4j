@@ -29,6 +29,7 @@ import org.springframework.data.neo4j.integration.conversion.domain.MonetaryAmou
 import org.springframework.data.neo4j.integration.conversion.domain.PensionPlan;
 import org.springframework.data.neo4j.integration.conversion.domain.SiteMember;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.UncategorizedGraphStoreException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -156,8 +157,8 @@ public class ConversionServiceTest extends MultiDriverTestClass {
         assertEquals("The element type wasn't loaded and converted correctly", ElementType.METHOD, loadedObject.getElementType());
     }
 
-    @Test(expected = ConverterNotFoundException.class)
-    public void shouldThrowExceptionIfSuitableConverterIsNotFound() {
+    @Test(expected = UncategorizedGraphStoreException.class)
+    public void shouldThrowExceptionIfDefaultConverterIsNotFound() {
         this.conversionService.addConverterFactory(new SpringMonetaryAmountToNumberConverterFactory());
 
         PensionPlan pension = new PensionPlan(new MonetaryAmount(20_000, 00), "Ashes Assets LLP");
