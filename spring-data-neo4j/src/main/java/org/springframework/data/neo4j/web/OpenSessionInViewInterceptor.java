@@ -21,7 +21,7 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor {
 	/**
 	 * Suffix that gets appended to the {@code SessionFactory}
 	 * {@code toString()} representation for the "participate in existing
-	 * session handling" request attribute.
+	 * sessionFactory handling" request attribute.
 	 *
 	 * @see #getParticipateAttributeName
 	 */

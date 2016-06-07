@@ -13,7 +13,8 @@
 
 package org.springframework.data.neo4j.repository.support;
 
-import org.neo4j.ogm.session.Session;
+import java.io.Serializable;
+
 import org.springframework.data.neo4j.repository.GraphRepositoryImpl;
 import org.springframework.data.neo4j.repository.query.GraphQueryLookupStrategy;
 import org.springframework.data.neo4j.session.SessionFactory;
@@ -26,42 +27,39 @@ import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.util.Assert;
 
-import java.io.Serializable;
-
 /**
  * @author Vince Bickers
  * @author Luanne Misquitta
  */
 public class GraphRepositoryFactory extends RepositoryFactorySupport {
 
-    private final SessionFactory sessionFactory;
-    private final Neo4jOperations neo4jOperations;
+	private final SessionFactory sessionFactory;
+	private final Neo4jOperations neo4jOperations;
 
-    public GraphRepositoryFactory(SessionFactory sessionFactory, Neo4jOperations neo4jOperations) {
-        Assert.notNull(sessionFactory);
-        this.sessionFactory = sessionFactory;
-        this.neo4jOperations = neo4jOperations;
-    }
+	public GraphRepositoryFactory(SessionFactory sessionFactory, Neo4jOperations neo4jOperations) {
+		Assert.notNull(sessionFactory);
+		this.sessionFactory = sessionFactory;
+		this.neo4jOperations = neo4jOperations;
+	}
 
-    @Override
-    public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> type) {
-        return new GraphEntityInformation(type);
-    }
+	@Override
+	public <T, ID extends Serializable> EntityInformation<T, ID> getEntityInformation(Class<T> type) {
+		return new GraphEntityInformation(type);
+	}
 
-    @Override
-    protected Object getTargetRepository(RepositoryInformation information) {
-        return getTargetRepositoryViaReflection(information, information.getDomainType(), neo4jOperations);
-    }
+	@Override
+	protected Object getTargetRepository(RepositoryInformation information) {
+		return getTargetRepositoryViaReflection(information, information.getDomainType(), neo4jOperations);
+	}
 
-    @Override
-    protected Class<?> getRepositoryBaseClass(RepositoryMetadata repositoryMetadata) {
-        return GraphRepositoryImpl.class;
-    }
+	@Override
+	protected Class<?> getRepositoryBaseClass(RepositoryMetadata repositoryMetadata) {
+		return GraphRepositoryImpl.class;
+	}
 
-    @Override
-    protected QueryLookupStrategy getQueryLookupStrategy(QueryLookupStrategy.Key key,
-                                                         EvaluationContextProvider evaluationContextProvider) {
-        return new GraphQueryLookupStrategy(sessionFactory);
-    }
-
+	@Override
+	protected QueryLookupStrategy getQueryLookupStrategy(QueryLookupStrategy.Key key,
+														 EvaluationContextProvider evaluationContextProvider) {
+		return new GraphQueryLookupStrategy(sessionFactory);
+	}
 }

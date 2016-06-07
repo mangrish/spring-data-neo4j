@@ -20,7 +20,7 @@ public class AuthenticationTest
 {
 //    private static AbstractNeoServer neoServer;
 //    private static int neoPort;
-//    private Session session;
+//    private Session sessionFactory;
 //    private Neo4jOperations template;
 //
 //    private boolean AUTH = true;
@@ -64,7 +64,7 @@ public class AuthenticationTest
 //
 //        init( NO_AUTH, "org.neo4j.ogm.domain.bike" );
 //
-//        try ( Transaction tx = session.beginTransaction() ) {
+//        try ( Transaction tx = sessionFactory.beginTransaction() ) {
 //            template.loadAll(Bike.class);
 //            fail("A non-authenticating version of Neo4j is running. Please start Neo4j 2.2.0 or later to run these tests");
 //        } catch (ResultProcessingException rpe) {
@@ -104,7 +104,7 @@ public class AuthenticationTest
 //
 //        init(AUTH, "org.neo4j.ogm.domain.bike");
 //
-//        try ( Transaction ignored = session.beginTransaction()) {
+//        try ( Transaction ignored = sessionFactory.beginTransaction()) {
 //            template.loadAll(Bike.class);
 //        } catch (ResultProcessingException rpe) {
 //            fail("'" + rpe.getCause().getLocalizedMessage() + "' was not expected here");
@@ -122,7 +122,7 @@ public class AuthenticationTest
 //
 //        initWithSuppliedCredentials("neo4j", "password", "org.neo4j.ogm.domain.bike");
 //
-//        try ( Transaction ignored = session.beginTransaction() ) {
+//        try ( Transaction ignored = sessionFactory.beginTransaction() ) {
 //            template.loadAll(Bike.class);
 //        } catch (ResultProcessingException rpe) {
 //            fail("'" + rpe.getCause().getLocalizedMessage() + "' was not expected here");
@@ -140,7 +140,7 @@ public class AuthenticationTest
 //
 //        initWithSuppliedCredentials("neo4j", "incorrectPassword", "org.neo4j.ogm.domain.bike");
 //
-//        try ( Transaction tx = session.beginTransaction() ) {
+//        try ( Transaction tx = sessionFactory.beginTransaction() ) {
 //            template.loadAll(Bike.class);
 //            fail("A non-authenticating version of Neo4j is running. Please start Neo4j 2.2.0 or later to run these tests");
 //        } catch (ResultProcessingException rpe) {
@@ -166,7 +166,7 @@ public class AuthenticationTest
 //        URI neoUri = neoServer.baseUri();
 //        initWithEmbeddedCredentials("http://neo4j:password@" + neoUri.getHost() + ":" + neoUri.getPort(), "org.neo4j.ogm.domain.bike");
 //
-//        try ( Transaction ignored = session.beginTransaction() ) {
+//        try ( Transaction ignored = sessionFactory.beginTransaction() ) {
 //            template.loadAll(Bike.class);
 //        } catch (ResultProcessingException rpe) {
 //            fail("'" + rpe.getCause().getLocalizedMessage() + "' was not expected here");
@@ -184,7 +184,7 @@ public class AuthenticationTest
 //
 //        initWithEmbeddedCredentials(neoServer.baseUri().toString(), "org.neo4j.ogm.domain.bike");
 //
-//        try ( Transaction tx = session.beginTransaction() ) {
+//        try ( Transaction tx = sessionFactory.beginTransaction() ) {
 //            template.loadAll(Bike.class);
 //            fail("A non-authenticating version of Neo4j is running. Please start Neo4j 2.2.0 or later to run these tests");
 //        } catch (ResultProcessingException rpe) {
@@ -221,7 +221,7 @@ public class AuthenticationTest
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        sessionFactory = configuration.getSession();
 //
 //
 //    }
@@ -242,7 +242,7 @@ public class AuthenticationTest
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        sessionFactory = configuration.getSession();
 //    }
 //
 //    private void initWithEmbeddedCredentials(final String url, final String... packages) throws Exception {
@@ -261,6 +261,6 @@ public class AuthenticationTest
 //            }
 //        };
 //        template = configuration.neo4jTemplate();
-//        session = configuration.getSession();
+//        sessionFactory = configuration.getSession();
 //    }
 }

@@ -13,7 +13,6 @@
 
 package org.springframework.data.neo4j.repository.query;
 
-import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.NamedQueries;

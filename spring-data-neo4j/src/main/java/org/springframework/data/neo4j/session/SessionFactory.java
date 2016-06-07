@@ -26,18 +26,18 @@ public interface SessionFactory {
 
 
 	/**
-	 * Obtains the current session.
+	 * Obtains the current sessionFactory.
 	 *
-	 * @return The current session.
+	 * @return The current sessionFactory.
 	 */
 	Session getCurrentSession();
 
 	/**
-	 * Closes the current session.
+	 * Closes the current sessionFactory.
 	 *
 	 * TODO: This method should be moved to Session and Session should extend AutoClosable.
 	 *
-	 * @param session The session to close;
+	 * @param session The sessionFactory to close;
 	 */
 	void closeSession(Session session);
 

@@ -156,9 +156,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				// We should set a specific isolation level but are not allowed to...
 				throw new InvalidIsolationLevelException(
-						"HibernateTransactionManager is not allowed to support custom isolation levels: " +
-								"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-								"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
+						"Neo4jTransactionManager is not allowed to support custom isolation levels.");
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
@@ -166,10 +164,10 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 
 			Transaction hibTx = session.beginTransaction();
 
-			// Add the Hibernate transaction to the session holder.
+			// Add the Hibernate transaction to the sessionFactory holder.
 			txObject.getSessionHolder().setTransaction(hibTx);
 
-			// Bind the session holder to the thread.
+			// Bind the sessionFactory holder to the thread.
 			if (txObject.isNewSessionHolder()) {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 			}
@@ -187,7 +185,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 					txObject.setSessionHolder(null);
 				}
 			}
-			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open Neo4j Session for transaction", ex);
 		}
 	}
 
@@ -275,7 +273,7 @@ public class Neo4jTransactionManager extends AbstractPlatformTransactionManager 
 	protected void doCleanupAfterCompletion(Object transaction) {
 		Neo4jTransactionObject txObject = (Neo4jTransactionObject) transaction;
 
-		// Remove the session holder from the thread.
+		// Remove the sessionFactory holder from the thread.
 		if (txObject.isNewSessionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}

@@ -278,7 +278,7 @@ public interface Neo4jOperations {
     <T> void deleteAll(Class<T> type);
 
     /**
-     * Removes all mapping information from the current session
+     * Removes all mapping information from the current sessionFactory
      */
     void clear();
 

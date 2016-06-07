@@ -15,8 +15,8 @@ package org.springframework.data.neo4j.repository.query.derived;
 
 import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.cypher.Filters;
-import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.repository.query.GraphQueryMethod;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.repository.core.EntityMetadata;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
@@ -38,13 +38,13 @@ public class DerivedGraphRepositoryQuery implements RepositoryQuery {
 
 	private final GraphQueryMethod graphQueryMethod;
 
-	protected final Session session;
+	protected final SessionFactory sessionFactory;
 
 	private final int DEFAULT_QUERY_DEPTH = 1;
 
-	public DerivedGraphRepositoryQuery(GraphQueryMethod graphQueryMethod, Session session) {
+	public DerivedGraphRepositoryQuery(GraphQueryMethod graphQueryMethod, SessionFactory sessionFactory) {
 		this.graphQueryMethod = graphQueryMethod;
-		this.session = session;
+		this.sessionFactory = sessionFactory;
 		EntityMetadata<?> info = graphQueryMethod.getEntityInformation();
 		PartTree tree = new PartTree(graphQueryMethod.getName(), info.getJavaType());
 		this.queryDefinition = new DerivedQueryCreator(tree, info.getJavaType()).createQuery();
@@ -71,10 +71,10 @@ public class DerivedGraphRepositoryQuery implements RepositoryQuery {
 		}
 
 		if (Iterable.class.isAssignableFrom(returnType)) {
-			return session.loadAll(concreteType, params, queryDepth);
+			return sessionFactory.getCurrentSession().loadAll(concreteType, params, queryDepth);
 		}
 
-		Iterator<?> objectIterator = session.loadAll(returnType, params, queryDepth).iterator();
+		Iterator<?> objectIterator = sessionFactory.getCurrentSession().loadAll(returnType, params, queryDepth).iterator();
 		if(objectIterator.hasNext()) {
 			return objectIterator.next();
 		}

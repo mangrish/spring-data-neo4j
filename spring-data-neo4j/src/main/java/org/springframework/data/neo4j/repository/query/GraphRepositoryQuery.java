@@ -16,7 +16,7 @@ package org.springframework.data.neo4j.repository.query;
 
 import org.neo4j.ogm.model.QueryStatistics;
 import org.neo4j.ogm.model.Result;
-import org.neo4j.ogm.session.Session;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.repository.query.*;
 
 import java.util.HashMap;
@@ -33,11 +33,11 @@ public class GraphRepositoryQuery implements RepositoryQuery {
 
     private final GraphQueryMethod graphQueryMethod;
 
-    protected final Session session;
+    protected final SessionFactory sessionFactory;
 
-    public GraphRepositoryQuery(GraphQueryMethod graphQueryMethod, Session session) {
+    public GraphRepositoryQuery(GraphQueryMethod graphQueryMethod, SessionFactory sessionFactory) {
         this.graphQueryMethod = graphQueryMethod;
-        this.session = session;
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
@@ -46,11 +46,11 @@ public class GraphRepositoryQuery implements RepositoryQuery {
         Class<?> concreteType = graphQueryMethod.resolveConcreteReturnType();
 
         Map<String, Object> params = resolveParams(parameters);
-        
+
         ParameterAccessor accessor = new ParametersParameterAccessor(graphQueryMethod.getParameters(), parameters);
         ResultProcessor processor = graphQueryMethod.getResultProcessor();
         Object result = execute(returnType, concreteType, getQueryString(), params);
-        
+
         return Result.class.equals(returnType) ? result :
         	processor.withDynamicProjection(accessor).processResult(result);
     }
@@ -58,7 +58,7 @@ public class GraphRepositoryQuery implements RepositoryQuery {
     protected Object execute(Class<?> returnType, Class<?> concreteType, String cypherQuery, Map<String, Object> queryParams) {
 
         if (returnType.equals(Void.class) || returnType.equals(void.class)) {
-            session.query(cypherQuery, queryParams);
+            sessionFactory.getCurrentSession().query(cypherQuery, queryParams);
             return null;
         }
 
@@ -66,16 +66,16 @@ public class GraphRepositoryQuery implements RepositoryQuery {
             // Special method to handle SDN Iterable<Map<String, Object>> behaviour.
             // TODO: Do we really want this method in an OGM? It's a little too low level and/or doesn't really fit.
             if (Map.class.isAssignableFrom(concreteType)) {
-                return session.query(cypherQuery, queryParams).queryResults();
+                return sessionFactory.getCurrentSession().query(cypherQuery, queryParams).queryResults();
             }
-            return session.query(concreteType, cypherQuery, queryParams);
+            return sessionFactory.getCurrentSession().query(concreteType, cypherQuery, queryParams);
         }
 
         if (queryReturnsStatistics()) {
-            return session.query(cypherQuery, queryParams);
+            return sessionFactory.getCurrentSession().query(cypherQuery, queryParams);
         }
 
-        return session.queryForObject(returnType, cypherQuery, queryParams);
+        return sessionFactory.getCurrentSession().queryForObject(returnType, cypherQuery, queryParams);
     }
 
     private Map<String, Object> resolveParams(Object[] parameters) {
@@ -87,7 +87,7 @@ public class GraphRepositoryQuery implements RepositoryQuery {
             Parameter parameter = methodParameters.getParameter(i);
 
             //The parameter might be an entity, try to resolve its id
-            Object parameterValue = session.resolveGraphIdFor(parameters[i]);
+            Object parameterValue = sessionFactory.getCurrentSession().resolveGraphIdFor(parameters[i]);
             if(parameterValue == null) { //Either not an entity or not persisted
                 parameterValue = parameters[i];
             }

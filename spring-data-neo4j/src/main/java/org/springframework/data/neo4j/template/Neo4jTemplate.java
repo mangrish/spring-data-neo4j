@@ -162,7 +162,7 @@ public class Neo4jTemplate implements Neo4jOperations, InitializingBean, Applica
 			session = getSessionFactory().getCurrentSession();
 		}
 		catch (RuntimeException ex) {
-			logger.debug("Could not retrieve pre-bound Neo4j OGM session", ex);
+			logger.debug("Could not retrieve pre-bound Neo4j OGM sessionFactory", ex);
 		}
 		if (session == null) {
 			session = getSessionFactory().openSession();

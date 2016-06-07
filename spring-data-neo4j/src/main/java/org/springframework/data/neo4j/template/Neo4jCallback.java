@@ -15,6 +15,7 @@ package org.springframework.data.neo4j.template;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Callback interface for Neo4J code. To be used with {@link Neo4jTemplate}'s
@@ -36,10 +37,11 @@ public interface Neo4jCallback<T> {
 	 * i.e. a domain object or a collection of domain objects.
 	 * A thrown custom RuntimeException is treated as an application exception:
 	 * It gets propagated to the caller of the template.
-	 * @param session active Neo4J OGM session
+	 * @param session active Neo4J OGM sessionFactory
 	 * @return a result object, or {@code null} if none
 	 * @throws RuntimeException if thrown by the Neo4j OGM API
 	 * @see Neo4jTemplate#execute
 	 */
+	@Transactional
 	T doInNeo4j(Session session) throws RuntimeException;
 }

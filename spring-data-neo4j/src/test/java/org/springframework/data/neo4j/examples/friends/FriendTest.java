@@ -26,6 +26,7 @@ import org.springframework.data.neo4j.examples.friends.domain.Friendship;
 import org.springframework.data.neo4j.examples.friends.domain.Person;
 import org.springframework.data.neo4j.examples.friends.repo.FriendshipRepository;
 import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.data.neo4j.template.Neo4jOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -37,7 +38,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FriendTest extends MultiDriverTestClass {
 
-	@Autowired SessionFactory sessionFactory;
+	SessionFactory sessionFactory = new SessionFactoryImpl();
 	@Autowired Neo4jOperations neo4jTemplate;
 	@Autowired FriendshipRepository friendshipRepository;
 	@Autowired FriendService friendService;

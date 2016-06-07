@@ -113,9 +113,9 @@ public class MyConfiguration extends Neo4jConfiguration {
         return new SessionFactory("com.example.person.domain",...);
     }
 
-    // needed for session in view in web-applications
+    // needed for sessionFactory in view in web-applications
     @Bean
-    @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+    @Scope(value = "sessionFactory", proxyMode = ScopedProxyMode.TARGET_CLASS)
     public Session getSession() throws Exception {
         return super.getSession();
     }
@@ -124,7 +124,7 @@ public class MyConfiguration extends Neo4jConfiguration {
 ----
 
 Spring Data Neo4j 4.1 provides support for connecting to Neo4j using different drivers.
-HTTP and Embedded drivers are available. 
+HTTP and Embedded drivers are available.
 Spring Data Neo4j will attempt to auto-configure itself using a file called `ogm.properties`, which it expects to find on the classpath.
 
 .ogm.properties
@@ -161,7 +161,7 @@ class Person {
 
 === Transactional services
 
-Create a repository or service to perform typical operations on your entities. 
+Create a repository or service to perform typical operations on your entities.
 The complete functionality is covered in the http://docs.spring.io/spring-data/data-neo4j/docs/current/reference/html/#reference_programming-model[reference manual]
 
 [source,java]
@@ -172,7 +172,7 @@ public interface PersonRepository extends GraphRepository<Person> {
 
    // derived finder method
    Person findByName(String name);
- 
+
    @Query("MATCH (c:Company)<-[:WORKS_AT]-(p:Person) WHERE id(c) = {company} RETURN p")
    List<Person> findEmployees(Company company);
 }

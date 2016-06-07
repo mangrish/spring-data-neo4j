@@ -4,7 +4,7 @@ import org.neo4j.ogm.session.Session;
 
 /**
  * Defines the contract for implementations which know how to scope the notion
- * of a {@link SessionFactory#getCurrentSession() current session}.
+ * of a {@link SessionFactory#getCurrentSession() current sessionFactory}.
  * <p/>
  * Implementations should adhere to the following:
  * <ul>
@@ -25,12 +25,12 @@ import org.neo4j.ogm.session.Session;
 public interface SessionContext {
 
 	/**
-	 * Retrieve the current session according to the scoping defined
+	 * Retrieve the current sessionFactory according to the scoping defined
 	 * by this implementation.
 	 *
-	 * @return The current session.
+	 * @return The current sessionFactory.
 	 * @throws RuntimeException Typically indicates an issue
-	 * locating or creating the current session.
+	 * locating or creating the current sessionFactory.
 	 */
 	Session currentSession() throws RuntimeException;
 

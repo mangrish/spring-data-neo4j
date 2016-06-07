@@ -25,8 +25,8 @@ import org.neo4j.ogm.annotations.EntityFactory;
 import org.neo4j.ogm.context.SingleUseEntityMapper;
 import org.neo4j.ogm.request.Request;
 import org.neo4j.ogm.session.GraphCallback;
-import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.transaction.Transaction;
+import org.springframework.data.neo4j.session.SessionFactory;
 
 /**
  * Specialisation of {@link GraphRepositoryQuery} that handles mapping to objects annotated with <code>&#064;QueryResult</code>.
@@ -39,9 +39,9 @@ public class QueryResultGraphRepositoryQuery extends GraphRepositoryQuery {
      * Constructs a new {@link QueryResultGraphRepositoryQuery} based on the given arguments.
      *
      * @param graphQueryMethod The {@link GraphQueryMethod} to which this repository query corresponds
-     * @param session The OGM {@link Session} used to execute the query
+     * @param session The OGM {@link SessionFactory} used to execute the query
      */
-    public QueryResultGraphRepositoryQuery(GraphQueryMethod graphQueryMethod, Session session) {
+    public QueryResultGraphRepositoryQuery(GraphQueryMethod graphQueryMethod, SessionFactory session) {
         super(graphQueryMethod, session);
     }
 
@@ -61,12 +61,12 @@ public class QueryResultGraphRepositoryQuery extends GraphRepositoryQuery {
 
 
 
-        return this.session.doInTransaction(new GraphCallback<Collection<Object>>() {
+        return this.sessionFactory.getCurrentSession().doInTransaction(new GraphCallback<Collection<Object>>() {
             @Override
             public Collection<Object> apply(Request requestHandler, Transaction transaction, MetaData metaData) {
                 Collection<Object> toReturn = new ArrayList<>();
                 SingleUseEntityMapper entityMapper = new SingleUseEntityMapper(metaData, new EntityFactory(metaData));
-                Iterable<Map<String,Object>> results = session.query(cypherQuery, queryParams);
+                Iterable<Map<String,Object>> results = sessionFactory.getCurrentSession().query(cypherQuery, queryParams);
                 for (Map<String,Object> result : results) {
                   toReturn.add(entityMapper.map(targetType, result));
                 }
@@ -76,7 +76,7 @@ public class QueryResultGraphRepositoryQuery extends GraphRepositoryQuery {
     }
 
     private Collection<Object> mapToProxy(Class<?> targetType, String cypherQuery, Map<String, Object> queryParams) {
-        Iterable<Map<String, Object>> queryResults = this.session.query(cypherQuery, queryParams);
+        Iterable<Map<String, Object>> queryResults = this.sessionFactory.getCurrentSession().query(cypherQuery, queryParams);
 
         Collection<Object> resultObjects = new ArrayList<>();
         Class<?>[] interfaces = new Class<?>[] {targetType};

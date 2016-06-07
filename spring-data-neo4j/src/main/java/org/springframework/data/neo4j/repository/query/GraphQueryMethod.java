@@ -19,7 +19,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
-import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.annotation.QueryResult;
@@ -100,11 +99,11 @@ public class GraphQueryMethod extends QueryMethod {
     public RepositoryQuery createQuery() {
         if (method.getAnnotation(Query.class) != null) {
             if (resolveConcreteReturnType().isAnnotationPresent(QueryResult.class)) {
-                return new QueryResultGraphRepositoryQuery(this, sessionFactory.getCurrentSession());
+                return new QueryResultGraphRepositoryQuery(this, sessionFactory);
             }
-            return new GraphRepositoryQuery(this, sessionFactory.getCurrentSession());
+            return new GraphRepositoryQuery(this, sessionFactory);
         }
-        return new DerivedGraphRepositoryQuery(this, sessionFactory.getCurrentSession());
+        return new DerivedGraphRepositoryQuery(this, sessionFactory);
 
     }
 
