@@ -13,17 +13,20 @@
 
 package org.springframework.data.neo4j.template.context;
 
-import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.event.AfterDeleteEvent;
 import org.springframework.data.neo4j.event.AfterSaveEvent;
 import org.springframework.data.neo4j.event.BeforeDeleteEvent;
 import org.springframework.data.neo4j.event.BeforeSaveEvent;
-import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
 import org.springframework.data.neo4j.template.TestNeo4jEventListener;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -34,31 +37,50 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-public class DataManipulationEventConfiguration extends Neo4jConfiguration {
+public class DataManipulationEventConfiguration {
 
-    @Override
-    public SessionFactory getSessionFactory() {
-        return new SessionFactoryImpl("org.springframework.data.neo4j.examples.movies.domain");
-    }
+	@Bean
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(getSessionFactory());
+	}
 
-    @Bean
-    public ApplicationListener<BeforeSaveEvent> beforeSaveEventListener() {
-        return new TestNeo4jEventListener<BeforeSaveEvent>() {};
-    }
+	@Bean
+	public PlatformTransactionManager transactionManager() {
+		Neo4jTransactionManager transactionManager = new Neo4jTransactionManager();
+		transactionManager.setSessionFactory(getSessionFactory());
+		transactionManager.afterPropertiesSet();
+		return transactionManager;
+	}
 
-    @Bean
-    public ApplicationListener<AfterSaveEvent> afterSaveEventListener() {
-        return new TestNeo4jEventListener<AfterSaveEvent>() {};
-    }
+	@Bean
+	public SessionFactory getSessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.movies.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 
-    @Bean
-    public ApplicationListener<BeforeDeleteEvent> beforeDeleteEventListener() {
-        return new TestNeo4jEventListener<BeforeDeleteEvent>() {};
-    }
+	@Bean
+	public ApplicationListener<BeforeSaveEvent> beforeSaveEventListener() {
+		return new TestNeo4jEventListener<BeforeSaveEvent>() {
+		};
+	}
 
-    @Bean
-    public ApplicationListener<AfterDeleteEvent> afterDeleteEventListener() {
-        return new TestNeo4jEventListener<AfterDeleteEvent>() {};
-    }
+	@Bean
+	public ApplicationListener<AfterSaveEvent> afterSaveEventListener() {
+		return new TestNeo4jEventListener<AfterSaveEvent>() {
+		};
+	}
 
+	@Bean
+	public ApplicationListener<BeforeDeleteEvent> beforeDeleteEventListener() {
+		return new TestNeo4jEventListener<BeforeDeleteEvent>() {
+		};
+	}
+
+	@Bean
+	public ApplicationListener<AfterDeleteEvent> afterDeleteEventListener() {
+		return new TestNeo4jEventListener<AfterDeleteEvent>() {
+		};
+	}
 }

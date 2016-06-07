@@ -12,12 +12,15 @@
  */
 package org.springframework.data.neo4j.extensions;
 
-import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -32,12 +35,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableNeo4jRepositories(repositoryBaseClass = CustomGraphRepositoryImpl.class)
 @EnableTransactionManagement
-public class CustomPersistenceContext extends Neo4jConfiguration {
+public class CustomPersistenceContext {
 
-    @Override
     @Bean
-    public SessionFactory getSessionFactory() {
-        return new SessionFactoryImpl("org.springframework.data.neo4j.extensions.domain");
+    public Neo4jOperations neo4jTemplate() throws Exception {
+        return new Neo4jTemplate(getSessionFactory());
     }
 
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        Neo4jTransactionManager transactionManager = new Neo4jTransactionManager();
+        transactionManager.setSessionFactory(getSessionFactory());
+        transactionManager.afterPropertiesSet();
+        return transactionManager;
+    }
+
+    @Bean
+    public SessionFactory getSessionFactory() {
+        LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+        lsfb.setPackagesToScan("org.springframework.data.neo4j.extensions.domain");
+        lsfb.afterPropertiesSet();
+        return lsfb.getObject();
+    }
 }

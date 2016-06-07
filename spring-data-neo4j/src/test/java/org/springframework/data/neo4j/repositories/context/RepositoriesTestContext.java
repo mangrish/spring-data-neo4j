@@ -13,13 +13,16 @@
 
 package org.springframework.data.neo4j.repositories.context;
 
-import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.session.SessionFactoryImpl;
+import org.springframework.data.neo4j.session.SessionFactory;
+import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -29,12 +32,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan({"org.springframework.data.neo4j.repositories"})
 @EnableNeo4jRepositories("org.springframework.data.neo4j.repositories.repo")
 @EnableTransactionManagement
-public class RepositoriesTestContext extends Neo4jConfiguration {
+public class RepositoriesTestContext {
 
-    @Override
-    @Bean
-    public SessionFactory getSessionFactory() {
-        return new SessionFactoryImpl("org.springframework.data.neo4j.repositories.domain");
-    }
+	@Bean
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(getSessionFactory());
+	}
 
+	@Bean
+	public PlatformTransactionManager transactionManager() {
+		Neo4jTransactionManager transactionManager = new Neo4jTransactionManager();
+		transactionManager.setSessionFactory(getSessionFactory());
+		transactionManager.afterPropertiesSet();
+		return transactionManager;
+	}
+
+	@Bean
+	public SessionFactory getSessionFactory() {
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setPackagesToScan("org.springframework.data.neo4j.repositories.domain");
+		lsfb.afterPropertiesSet();
+		return lsfb.getObject();
+	}
 }

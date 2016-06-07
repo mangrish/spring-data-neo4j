@@ -52,7 +52,7 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 	}
 
 	@Override
-	public SessionFactory getObject() throws Exception {
+	public SessionFactory getObject()  {
 		return sessionFactory;
 	}
 
@@ -67,7 +67,7 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>,
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		logger.info("Building new Neo4j SessionFactory");
 		if (configuration != null) {
 			this.sessionFactory = new SessionFactoryImpl(configuration, packagesToScan);

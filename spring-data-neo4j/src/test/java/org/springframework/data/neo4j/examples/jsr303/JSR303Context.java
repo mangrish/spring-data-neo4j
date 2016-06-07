@@ -16,10 +16,13 @@ package org.springframework.data.neo4j.examples.jsr303;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.LocalSessionFactoryBean;
+import org.springframework.data.neo4j.template.Neo4jOperations;
+import org.springframework.data.neo4j.template.Neo4jTemplate;
+import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -29,11 +32,23 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan
 @EnableNeo4jRepositories("org.springframework.data.neo4j.examples.jsr303.repo")
 @EnableTransactionManagement
-public class JSR303Context extends Neo4jConfiguration {
+public class JSR303Context {
 
 	@Bean
-	@Override
-	public SessionFactory getSessionFactory() throws Exception {
+	public Neo4jOperations neo4jTemplate() throws Exception {
+		return new Neo4jTemplate(getSessionFactory());
+	}
+
+	@Bean
+	public PlatformTransactionManager transactionManager() {
+		Neo4jTransactionManager transactionManager = new Neo4jTransactionManager();
+		transactionManager.setSessionFactory(getSessionFactory());
+		transactionManager.afterPropertiesSet();
+		return transactionManager;
+	}
+
+	@Bean
+	public SessionFactory getSessionFactory() {
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setPackagesToScan("org.springframework.data.neo4j.examples.jsr303.domain");
 		lsfb.afterPropertiesSet();

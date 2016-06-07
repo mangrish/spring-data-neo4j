@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.data.neo4j.session.SessionFactory;
 import org.neo4j.ogm.testutil.MultiDriverTestClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
+import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.session.SessionFactoryImpl;
 import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.stereotype.Component;
@@ -345,7 +344,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class BasicConfiguration extends Neo4jConfiguration {
+	static class BasicConfiguration {
 
 		@Bean // set automatically with tx management
 		public TransactionalEventListenerFactory transactionalEventListenerFactory() {
@@ -362,7 +361,7 @@ public class TransactionalEventListenerTests extends MultiDriverTestClass {
 			return new CallCountingTransactionManager(sessionFactory);
 		}
 
-		@Override
+		@Bean
 		public SessionFactory getSessionFactory() {
 			return new SessionFactoryImpl("org.springframework.data.neo4j.transactions.domain");
 		}
