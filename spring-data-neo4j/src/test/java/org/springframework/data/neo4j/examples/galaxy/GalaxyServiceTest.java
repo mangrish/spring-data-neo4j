@@ -48,8 +48,8 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration(classes = {GalaxyContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
-@Transactional
 @DirtiesContext
+@Transactional
 public class GalaxyServiceTest extends MultiDriverTestClass {
 
     @Autowired

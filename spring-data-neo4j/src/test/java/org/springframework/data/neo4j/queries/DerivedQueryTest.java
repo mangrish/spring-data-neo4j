@@ -33,6 +33,7 @@ import org.springframework.data.neo4j.examples.movies.repo.UserRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = {MoviesContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
+@Transactional
 public class DerivedQueryTest extends MultiDriverTestClass {
 
 	private static GraphDatabaseService graphDatabaseService = getGraphDatabaseService();

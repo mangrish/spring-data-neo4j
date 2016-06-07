@@ -30,6 +30,7 @@ import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration(classes = {MoviesContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
+@Transactional
 public class DerivedRelationshipEntityQueryTest extends MultiDriverTestClass {
 
 	private static GraphDatabaseService graphDatabaseService = getGraphDatabaseService();

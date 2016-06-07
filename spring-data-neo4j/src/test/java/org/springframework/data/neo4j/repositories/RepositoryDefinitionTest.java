@@ -27,12 +27,14 @@ import org.springframework.data.neo4j.repositories.repo.MovieRepository;
 import org.springframework.data.neo4j.util.IterableUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Michal Bachman
  */
 @ContextConfiguration(classes = {RepositoriesTestContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class RepositoryDefinitionTest extends MultiDriverTestClass {
 
 	private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();

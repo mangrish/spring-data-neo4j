@@ -13,6 +13,7 @@
 package org.springframework.data.neo4j.integration.conversion;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.neo4j.conversion.MetaDataDrivenConversionService;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Adam George
  */
 @Configuration
+@ComponentScan("org.springframework.data.neo4j.integration.conversion")
 @EnableNeo4jRepositories
 @EnableTransactionManagement
 public class ConversionServicePersistenceContext {

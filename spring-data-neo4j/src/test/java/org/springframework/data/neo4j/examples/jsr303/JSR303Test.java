@@ -43,9 +43,6 @@ public class JSR303Test extends MultiDriverTestClass {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    private AdultService service;
-
-    @Autowired
     WebApplicationContext wac;
 
     private MockMvc mockMvc;

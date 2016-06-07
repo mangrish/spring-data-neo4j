@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @ContextConfiguration(classes = {FriendContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class FriendTest extends MultiDriverTestClass {
 
 	@Autowired SessionFactory sessionFactory;
@@ -48,7 +49,6 @@ public class FriendTest extends MultiDriverTestClass {
 	 * @see DATAGRAPH-703
 	 */
 	@Test
-	@Transactional
 	public void savingPersonWhenTransactionalShouldWork() {
 		friendService.createPersonAndFriends();
 
@@ -62,7 +62,6 @@ public class FriendTest extends MultiDriverTestClass {
 	 * @see DATAGRAPH-694
 	 */
 	@Test
-	@Transactional
 	public void circularParamtersShouldNotProduceInfiniteRecursion() {
 		Person john = new Person();
 		john.setFirstName("John");

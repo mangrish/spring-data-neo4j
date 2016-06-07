@@ -24,6 +24,7 @@ import org.springframework.data.neo4j.examples.galaxy.repo.WorldRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertNotNull;
 @ContextConfiguration(classes = {GalaxyContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
+@Transactional
 public class QueryReturnTypesTest extends MultiDriverTestClass {
 
     @Autowired

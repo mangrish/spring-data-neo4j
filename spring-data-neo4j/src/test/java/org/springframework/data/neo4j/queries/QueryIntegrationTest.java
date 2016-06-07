@@ -61,6 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(classes = {MoviesContext.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
+@Transactional
 public class QueryIntegrationTest extends MultiDriverTestClass {
 
     private static GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
@@ -69,7 +70,6 @@ public class QueryIntegrationTest extends MultiDriverTestClass {
     private UserRepository userRepository;
 
     @Before
-    @Transactional
     public void init() {
         clearDatabase();
     }

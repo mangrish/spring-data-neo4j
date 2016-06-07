@@ -32,6 +32,7 @@ import org.springframework.data.neo4j.session.SessionFactory;
 import org.springframework.data.neo4j.support.UncategorizedGraphStoreException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.annotation.ElementType;
 import java.math.BigInteger;
@@ -48,6 +49,7 @@ import static org.junit.Assert.*;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ConversionServicePersistenceContext.class })
+@Transactional
 public class ConversionServiceTest extends MultiDriverTestClass {
 
     private GraphDatabaseService graphDatabaseService = getGraphDatabaseService();
